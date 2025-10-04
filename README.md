@@ -1,0 +1,2 @@
+# WildSync
+I-Powered Forest Management System - An intelligent platform that helps forest departments analyze ecosystem data and make data-driven conservation decisions. Upload forest data (tree counts, animal populations, soil quality, location details, past calamities) and get actionable insights through interactive heat maps and AI-generated recommendations for optimal resource allocation and wildlife protection
