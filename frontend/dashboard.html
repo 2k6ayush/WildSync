@@ -15,6 +15,8 @@
     <!-- Leaflet for maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet.heat plugin for heatmaps -->
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌲</text></svg>">
@@ -172,10 +174,17 @@
                                 </div>
                                 
                                 <div id="analysis-content">
-                                    <div class="analysis-status">
-                                        <p>Upload forest data first to begin analysis.</p>
-                                        <button class="btn btn-primary" data-section="upload">Upload Data</button>
+                                    <div class="form-group">
+                                        <label for="forest-id" class="form-label">Forest ID</label>
+                                        <input type="number" id="forest-id" class="form-control" placeholder="Enter Forest ID">
+                                        <small class="form-help">Provide the Forest ID you want to analyze.</small>
                                     </div>
+                                    <div class="analysis-status">
+                                        <p>Provide a Forest ID and start the AI analysis. Ensure data is uploaded for this forest.</p>
+                                        <button class="btn btn-primary" onclick="startAnalysis()">Start Analysis</button>
+                                        <button class="btn btn-secondary" data-section="upload">Go to Uploads</button>
+                                    </div>
+                                </div>
                                 </div>
                                 
                                 <div id="analysis-results" class="d-none">
@@ -213,11 +222,17 @@
                                 
                                 <div class="map-controls mt-3">
                                     <label for="layer-select">Select Layer:</label>
-                                    <select id="layer-select" class="form-control" style="width: auto; display: inline-block;">
+                                    <select id="layer-select" class="form-control" style="width: auto; display: inline-block; margin-right: 8px;">
                                         <option value="risk">Risk Zones</option>
                                         <option value="biodiversity">Biodiversity</option>
                                         <option value="soil">Soil Quality</option>
                                         <option value="wildlife">Wildlife Density</option>
+                                    </select>
+                                    <label for="render-mode" style="margin-left: 12px;">View:</label>
+                                    <select id="render-mode" class="form-control" style="width: auto; display: inline-block;">
+                                        <option value="auto" selected>Auto</option>
+                                        <option value="heat">Heatmap</option>
+                                        <option value="markers">Markers</option>
                                     </select>
                                 </div>
                             </div>
@@ -304,6 +319,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="static/js/config.js"></script>
     <script src="static/js/main.js"></script>
     <script>
         // Dashboard initialization
@@ -431,31 +447,179 @@
         }
 
         // Analysis functionality
+        let currentAnalysisId = null;
         async function startAnalysis() {
             const analysisContent = document.getElementById('analysis-content');
             const analysisResults = document.getElementById('analysis-results');
+            const forestIdInput = document.getElementById('forest-id');
+            const forestId = parseInt(forestIdInput && forestIdInput.value, 10);
+
+            if (!forestId) {
+                WildSync.Utils.showAlert('Please enter a valid Forest ID.', 'warning');
+                return;
+            }
             
             try {
                 WildSync.Utils.showLoading(analysisContent);
                 
-                // Simulate analysis API call
-                // const result = await WildSync.API.analysis.start(forestId);
+                const result = await WildSync.API.analysis.start(forestId);
+                currentAnalysisId = result.analysis_id;
+
+                analysisContent.classList.add('d-none');
+                analysisResults.classList.remove('d-none');
                 
-                // Mock analysis results for demonstration
-                setTimeout(() => {
-                    analysisContent.classList.add('d-none');
-                    analysisResults.classList.remove('d-none');
-                    
-                    // Initialize charts
-                    createCompletenessChart();
-                    displayRiskMetrics();
-                    displayRecommendations();
-                    
-                    WildSync.Utils.showAlert('Analysis completed successfully!', 'success');
-                }, 2000);
+                // Initialize charts (use generic placeholders; adjust if backend returns metrics)
+                createCompletenessChart();
+                displayRiskMetrics();
+                displayRecommendations(result.recommendations);
                 
+                // Attempt to load map layers for this analysis
+                try {
+                    const layers = await WildSync.API.maps.getLayers(currentAnalysisId);
+                    lastLayers = layers;
+                    renderLayers(layers, renderMode);
+                } catch (e) {
+                    console.warn('Unable to load map layers:', e);
+                }
+                
+                WildSync.Utils.showAlert('Analysis completed successfully!', 'success');
             } catch (error) {
-                WildSync.Utils.showAlert('Analysis failed. Please try again.', 'error');
+                if (error.status === 422 && error.data && error.data.status === 'insufficient') {
+                    const missing = (error.data.missing || []).join(', ');
+                    WildSync.Utils.showAlert(`Insufficient data for analysis. Missing: ${missing}`, 'warning');
+                } else if (error.status === 404) {
+                    WildSync.Utils.showAlert('Forest not found or you do not have access.', 'error');
+                } else {
+                    WildSync.Utils.showAlert('Analysis failed. Please try again.', 'error');
+                }
+            }
+        }
+
+        function renderLayers(layers, mode = 'auto') {
+            try {
+                if (!layers) return;
+                initializeMap();
+                if (!dataLayerGroup) return;
+
+                // Clear previous dynamic layers
+                dataLayerGroup.clearLayers();
+                // Clear existing heat layer if present
+                if (heatLayer && map) {
+                    try { map.removeLayer(heatLayer); } catch (_) {}
+                    heatLayer = null;
+                }
+
+                let bounds = null;
+
+                // Support GeoJSON if present
+                if (layers.type === 'FeatureCollection' || layers.features) {
+                    const gj = L.geoJSON(layers, {
+                        style: function () { return { color: '#ff7800', weight: 2, fillOpacity: 0.3 }; }
+                    });
+                    gj.addTo(dataLayerGroup);
+                    try { bounds = gj.getBounds(); } catch (_) {}
+                }
+
+                // Heatmap support: if backend provides weighted points
+                let heatPoints = [];
+                const modeLower = (mode || 'auto').toLowerCase();
+                const forceHeat = modeLower === 'heat';
+                const forceMarkers = modeLower === 'markers';
+                if (Array.isArray(layers.heat)) {
+                    // Expected format: [{lat, lng, weight}]
+                    heatPoints = layers.heat
+                        .filter(p => p.lat && p.lng)
+                        .map(p => [p.lat, p.lng, p.weight || p.intensity || 0.5]);
+                } else if (Array.isArray(layers.heatmap)) {
+                    heatPoints = layers.heatmap
+                        .filter(p => p.lat && p.lng)
+                        .map(p => [p.lat, p.lng, p.weight || p.intensity || 0.5]);
+                } else if (Array.isArray(layers.heat_points)) {
+                    heatPoints = layers.heat_points
+                        .filter(p => p.lat && p.lng)
+                        .map(p => [p.lat, p.lng, p.weight || p.intensity || 0.5]);
+                } else if (Array.isArray(layers.points) && layers.points.some(p => p.weight || p.intensity)) {
+                    // If points carry a weight/intensity attribute, use them
+                    heatPoints = layers.points
+                        .filter(p => p.lat && p.lng)
+                        .map(p => [p.lat, p.lng, p.weight || p.intensity || 0.5]);
+                }
+
+                if (!forceMarkers && heatPoints.length) {
+                    // Build heat layer
+                    heatLayer = L.heatLayer(heatPoints, {
+                        radius: layers.heat_radius || 25,
+                        blur: layers.heat_blur || 15,
+                        maxZoom: layers.heat_maxZoom || 17,
+                        max: layers.heat_max || 1.0,
+                        gradient: layers.heat_gradient || undefined
+                    }).addTo(dataLayerGroup);
+
+                    // Compute bounds from heat points
+                    const hpBounds = new L.LatLngBounds();
+                    heatPoints.forEach(([lat, lng]) => hpBounds.extend([lat, lng]));
+                    if (!bounds || !bounds.isValid()) { bounds = hpBounds; }
+                }
+
+                // If points array is present (non-weighted markers)
+                if (Array.isArray(layers.points) && (forceMarkers || heatPoints.length === 0)) {
+                    const layerItems = [];
+                    const ptsBounds = new L.LatLngBounds();
+                    layers.points.forEach(p => {
+                        if (p.lat && p.lng) {
+                            const color = p.risk === 'high' ? 'red' : p.risk === 'medium' ? 'orange' : 'green';
+                            const circle = L.circle([p.lat, p.lng], { color, fillColor: color, fillOpacity: 0.3, radius: p.radius || 800 });
+                            layerItems.push(circle);
+                            ptsBounds.extend([p.lat, p.lng]);
+                        }
+                    });
+                    if (layerItems.length) {
+                        const group = L.layerGroup(layerItems).addTo(dataLayerGroup);
+                        if (!bounds || !bounds.isValid()) { bounds = ptsBounds; }
+                    }
+                }
+
+                // BBox fallback if provided: [west, south, east, north]
+                if ((!bounds || !bounds.isValid()) && Array.isArray(layers.bbox) && layers.bbox.length === 4) {
+                    const [west, south, east, north] = layers.bbox;
+                    bounds = L.latLngBounds([south, west], [north, east]);
+                }
+
+                // Fit map to data bounds if valid
+                if (bounds && bounds.isValid()) {
+                    map.fitBounds(bounds, { padding: [20, 20] });
+                }
+
+            } catch (e) {
+                console.warn('Failed to render layers:', e);
+            }
+        }
+
+        function displayRecommendations(recs) {
+            if (!recs) {
+                // Fallback recommendations
+                document.getElementById('ai-recommendations').innerHTML = `
+                    <div class="recommendation">
+                        <h5>🌳 Forest Health</h5>
+                        <p>Implement selective thinning in high-density areas to reduce fire risk and improve forest health.</p>
+                    </div>
+                    <div class="recommendation">
+                        <h5>🦎 Wildlife Protection</h5>
+                        <p>Establish buffer zones around identified wildlife corridors to maintain ecosystem connectivity.</p>
+                    </div>
+                    <div class="recommendation">
+                        <h5>💧 Water Management</h5>
+                        <p>Install water retention systems in areas with declining soil moisture levels.</p>
+                    </div>
+                `;
+                return;
+            }
+            // Render backend recommendations structure if provided
+            const container = document.getElementById('ai-recommendations');
+            if (Array.isArray(recs)) {
+                container.innerHTML = recs.map(item => `<div class="recommendation"><h5>${item.title || 'Recommendation'}</h5><p>${item.text || ''}</p></div>`).join('');
+            } else {
+                container.textContent = JSON.stringify(recs, null, 2);
             }
         }
 
@@ -523,6 +687,10 @@
 
         // Maps functionality
         let map = null;
+        let dataLayerGroup = null;
+        let heatLayer = null;
+        let renderMode = 'auto';
+        let lastLayers = null;
 
         function initMaps() {
             // Map will be initialized when section is shown
@@ -534,39 +702,14 @@
             const mapElement = document.getElementById('forest-map');
             if (!mapElement) return;
             
-            map = L.map('forest-map').setView([40.7128, -74.0060], 10);
+            map = L.map('forest-map', { preferCanvas: true }).setView([0, 0], 2);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            // Add sample markers and heat zones
-            addSampleData();
-        }
-
-        function addSampleData() {
-            // Sample forest data points
-            const forestData = [
-                { lat: 40.7128, lng: -74.0060, risk: 'high', type: 'Forest Area A' },
-                { lat: 40.7580, lng: -73.9855, risk: 'medium', type: 'Forest Area B' },
-                { lat: 40.6892, lng: -74.0445, risk: 'low', type: 'Forest Area C' }
-            ];
-
-            forestData.forEach(point => {
-                const color = point.risk === 'high' ? 'red' : 
-                             point.risk === 'medium' ? 'orange' : 'green';
-                
-                L.circle([point.lat, point.lng], {
-                    color: color,
-                    fillColor: color,
-                    fillOpacity: 0.3,
-                    radius: 1000
-                }).addTo(map).bindPopup(`
-                    <b>${point.type}</b><br>
-                    Risk Level: ${point.risk}<br>
-                    Click for detailed analysis
-                `);
-            });
+            // Create a dedicated layer group for dynamic backend layers
+            dataLayerGroup = L.layerGroup().addTo(map);
         }
 
         // Load overview data
@@ -599,6 +742,19 @@
                 console.error('Failed to load overview data:', error);
             }
         }
+
+        // Map controls: re-render on mode change
+        document.addEventListener('DOMContentLoaded', () => {
+            const modeSelect = document.getElementById('render-mode');
+            if (modeSelect) {
+                modeSelect.addEventListener('change', (e) => {
+                    renderMode = e.target.value;
+                    if (lastLayers) {
+                        renderLayers(lastLayers, renderMode);
+                    }
+                });
+            }
+        });
     </script>
 
     <style>

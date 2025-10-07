@@ -2,7 +2,7 @@
 // API utilities, authentication, and common functionality
 
 // Configuration
-const API_BASE = '/api';
+const API_BASE = (window.__API_BASE__ || (window.__API_CONFIG__ && window.__API_CONFIG__.API_BASE) || '/api');
 const CONFIG = {
     endpoints: {
         auth: `${API_BASE}/auth`,
@@ -90,10 +90,18 @@ const API = {
 
         try {
             const response = await fetch(endpoint, finalOptions);
-            const data = await response.json();
+            let data = null;
+            try {
+                data = await response.json();
+            } catch (e) {
+                // Non-JSON response
+            }
             
             if (!response.ok) {
-                throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                const err = new Error((data && data.error) || `HTTP error! status: ${response.status}`);
+                err.status = response.status;
+                err.data = data;
+                throw err;
             }
             
             return data;

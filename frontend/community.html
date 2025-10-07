@@ -151,15 +151,21 @@
                     <label>Filter by Location:</label>
                     <select id="location-filter" class="form-control">
                         <option value="">All Locations</option>
-                        <option value="north-america">North America</option>
-                        <option value="south-america">South America</option>
-                        <option value="europe">Europe</option>
-                        <option value="asia">Asia</option>
-                        <option value="africa">Africa</option>
-                        <option value="oceania">Oceania</option>
+                        <option value="north">North</option>
+                        <option value="south">South</option>
+                        <option value="east">East</option>
+                        <option value="west">West</option>
                     </select>
                 </div>
             </div>
+
+            <script>
+                document.addEventListener('change', (e) => {
+                    if (e.target && e.target.id === 'location-filter') {
+                        loadCaseStudies();
+                    }
+                });
+            </script>
 
             <div id="case-studies-grid" class="case-studies-grid">
                 <!-- Case studies will be loaded here -->
@@ -228,6 +234,7 @@
     </section>
 
     <!-- Scripts -->
+    <script src="static/js/config.js"></script>
     <script src="static/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
@@ -344,6 +351,12 @@
             try {
                 WildSync.Utils.showLoading(postsContainer);
                 
+                // Load from backend
+                const posts = await WildSync.API.community.getForumPosts(category);
+                displayForumPosts(posts);
+                
+            } catch (error) {
+                console.warn('Falling back to mock forum posts:', error);
                 // Mock data for demonstration
                 const mockPosts = [
                     {
@@ -428,6 +441,13 @@
             const gridContainer = document.getElementById('case-studies-grid');
             
             try {
+                const select = document.getElementById('location-filter');
+                const location = select ? select.value : null;
+                const caseStudies = await WildSync.API.community.getCaseStudies(location);
+                displayCaseStudies(caseStudies);
+                
+            } catch (error) {
+                console.warn('Falling back to mock case studies:', error);
                 // Mock data for demonstration
                 const mockCaseStudies = [
                     {
