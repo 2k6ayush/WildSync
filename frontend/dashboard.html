@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - WildSync</title>
+    <meta name="description" content="Forest management dashboard with AI analytics and data visualization.">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="static/css/main.css">
+    
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Leaflet for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌲</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <div class="logo-icon">🌲</div>
+                    <a href="index.html" style="color: inherit; text-decoration: none;">
+                        <span>WildSync</span>
+                    </a>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="community.html">Community</a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    <span id="user-profile"></span>
+                    <button class="btn btn-light" id="logout-btn">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-3">
+                    <div class="sidebar">
+                        <h4>Forest Management</h4>
+                        <ul class="sidebar-menu">
+                            <li><a href="#overview" class="menu-link active" data-section="overview">📊 Overview</a></li>
+                            <li><a href="#upload" class="menu-link" data-section="upload">📁 Upload Data</a></li>
+                            <li><a href="#analysis" class="menu-link" data-section="analysis">🔬 Analysis</a></li>
+                            <li><a href="#maps" class="menu-link" data-section="maps">🗺️ Heat Maps</a></li>
+                            <li><a href="#chatbot" class="menu-link" data-section="chatbot">💬 AI Assistant</a></li>
+                            <li><a href="#reports" class="menu-link" data-section="reports">📋 Reports</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-9">
+                    <div class="main-content">
+                        <!-- Overview Section -->
+                        <div id="overview-section" class="content-section active">
+                            <h2>Forest Management Overview</h2>
+                            
+                            <!-- Quick Stats -->
+                            <div class="row mb-4">
+                                <div class="col-3">
+                                    <div class="stat-card">
+                                        <div class="stat-icon">🌳</div>
+                                        <div class="stat-number" id="total-forests">-</div>
+                                        <div class="stat-label">Forests Managed</div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="stat-card">
+                                        <div class="stat-icon">📊</div>
+                                        <div class="stat-number" id="total-analyses">-</div>
+                                        <div class="stat-label">Analyses Complete</div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="stat-card">
+                                        <div class="stat-icon">⚠️</div>
+                                        <div class="stat-number" id="risk-zones">-</div>
+                                        <div class="stat-label">Risk Zones</div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <div class="stat-card">
+                                        <div class="stat-icon">✅</div>
+                                        <div class="stat-number" id="data-completeness">-</div>
+                                        <div class="stat-label">Data Completeness</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Activity -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Recent Activity</h3>
+                                </div>
+                                <div id="recent-activity">
+                                    <p class="text-center">Loading recent activity...</p>
+                                </div>
+                            </div>
+
+                            <!-- Quick Actions -->
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <h3>Quick Actions</h3>
+                                </div>
+                                <div class="quick-actions">
+                                    <button class="btn btn-primary quick-action-btn" data-section="upload">
+                                        📁 Upload Forest Data
+                                    </button>
+                                    <button class="btn btn-secondary quick-action-btn" data-section="analysis">
+                                        🔬 Start Analysis
+                                    </button>
+                                    <button class="btn btn-outline quick-action-btn" data-section="chatbot">
+                                        💬 Ask AI Assistant
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload Section -->
+                        <div id="upload-section" class="content-section">
+                            <h2>Upload Forest Data</h2>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Data Upload</h3>
+                                    <p>Upload forest data files including tree counts, animal populations, soil quality, and calamity history.</p>
+                                </div>
+                                
+                                <div class="upload-area" id="upload-area">
+                                    <div class="upload-icon">📁</div>
+                                    <h4>Drag & Drop Files Here</h4>
+                                    <p>or <strong>click to browse</strong></p>
+                                    <small>Supports CSV, Excel, PDF, and Images with GPS data</small>
+                                </div>
+                                
+                                <input type="file" id="file-input" class="d-none" multiple 
+                                       accept=".csv,.xlsx,.xls,.pdf,.png,.jpg,.jpeg">
+                                
+                                <div id="upload-progress" class="mt-3 d-none">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill"></div>
+                                    </div>
+                                    <div class="progress-text">Uploading...</div>
+                                </div>
+                                
+                                <div id="uploaded-files" class="mt-3"></div>
+                            </div>
+                        </div>
+
+                        <!-- Analysis Section -->
+                        <div id="analysis-section" class="content-section">
+                            <h2>Data Analysis</h2>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Forest Data Analysis</h3>
+                                </div>
+                                
+                                <div id="analysis-content">
+                                    <div class="analysis-status">
+                                        <p>Upload forest data first to begin analysis.</p>
+                                        <button class="btn btn-primary" data-section="upload">Upload Data</button>
+                                    </div>
+                                </div>
+                                
+                                <div id="analysis-results" class="d-none">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <h4>Data Completeness</h4>
+                                            <canvas id="completeness-chart"></canvas>
+                                        </div>
+                                        <div class="col-6">
+                                            <h4>Risk Assessment</h4>
+                                            <div id="risk-metrics"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <h4>AI Recommendations</h4>
+                                        <div id="ai-recommendations"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Maps Section -->
+                        <div id="maps-section" class="content-section">
+                            <h2>Interactive Heat Maps</h2>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Forest Ecosystem Visualization</h3>
+                                </div>
+                                
+                                <div id="map-container" class="map-container">
+                                    <div id="forest-map"></div>
+                                </div>
+                                
+                                <div class="map-controls mt-3">
+                                    <label for="layer-select">Select Layer:</label>
+                                    <select id="layer-select" class="form-control" style="width: auto; display: inline-block;">
+                                        <option value="risk">Risk Zones</option>
+                                        <option value="biodiversity">Biodiversity</option>
+                                        <option value="soil">Soil Quality</option>
+                                        <option value="wildlife">Wildlife Density</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chatbot Section -->
+                        <div id="chatbot-section" class="content-section">
+                            <h2>AI Forest Management Assistant</h2>
+                            
+                            <div class="chat-container" id="chat-container">
+                                <div class="chat-messages" id="chat-messages">
+                                    <div class="chat-message bot">
+                                        👋 Hello! I'm your AI forest management assistant. I can help you with:
+                                        <br><br>
+                                        • Data analysis insights<br>
+                                        • Conservation best practices<br>
+                                        • Risk assessment questions<br>
+                                        • Resource allocation advice<br>
+                                        <br>
+                                        What would you like to know?
+                                    </div>
+                                </div>
+                                
+                                <div class="chat-input-area">
+                                    <input type="text" class="form-control chat-input" 
+                                           placeholder="Ask about forest management..." maxlength="500">
+                                    <button class="btn btn-primary chat-send-btn">Send</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reports Section -->
+                        <div id="reports-section" class="content-section">
+                            <h2>Reports & Export</h2>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3>Generate Reports</h3>
+                                </div>
+                                
+                                <div class="report-options">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="report-type">
+                                                <h4>📊 Analysis Summary</h4>
+                                                <p>Complete analysis report with charts and recommendations.</p>
+                                                <button class="btn btn-primary">Generate PDF</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-6">
+                                            <div class="report-type">
+                                                <h4>🗺️ Heat Map Export</h4>
+                                                <p>Export interactive heat maps as high-resolution images.</p>
+                                                <button class="btn btn-secondary">Export Images</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mt-3">
+                                        <div class="col-6">
+                                            <div class="report-type">
+                                                <h4>📋 Data Export</h4>
+                                                <p>Export processed data as CSV or Excel files.</p>
+                                                <button class="btn btn-outline">Export Data</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-6">
+                                            <div class="report-type">
+                                                <h4>📈 Dashboard Report</h4>
+                                                <p>Executive summary with key metrics and insights.</p>
+                                                <button class="btn btn-outline">Create Summary</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="static/js/main.js"></script>
+    <script>
+        // Dashboard initialization
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Require authentication
+            if (!WildSync.Auth.requireAuth()) {
+                return;
+            }
+
+            // Initialize dashboard components
+            initSidebar();
+            initFileUpload();
+            initChatbot();
+            initMaps();
+            
+            // Load initial data
+            loadOverviewData();
+            
+            // Set up logout
+            document.getElementById('logout-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                WildSync.Auth.logout();
+            });
+        });
+
+        // Sidebar navigation
+        function initSidebar() {
+            const menuLinks = document.querySelectorAll('.menu-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+
+            function showSection(sectionId) {
+                // Hide all sections
+                contentSections.forEach(section => section.classList.remove('active'));
+                
+                // Show target section
+                const targetSection = document.getElementById(sectionId + '-section');
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+
+                // Update menu active state
+                menuLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+
+                // Special initialization for certain sections
+                if (sectionId === 'maps') {
+                    setTimeout(initializeMap, 100);
+                }
+            }
+
+            // Menu link handlers
+            menuLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = link.dataset.section;
+                    showSection(sectionId);
+                });
+            });
+
+            // Quick action handlers
+            quickActionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sectionId = btn.dataset.section;
+                    showSection(sectionId);
+                });
+            });
+        }
+
+        // File upload functionality
+        function initFileUpload() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('file-input');
+            const uploadProgress = document.getElementById('upload-progress');
+            const uploadedFiles = document.getElementById('uploaded-files');
+
+            WildSync.FileUpload.initDragAndDrop(uploadArea, fileInput, handleFileUpload);
+
+            async function handleFileUpload(file) {
+                try {
+                    showUploadProgress();
+                    const result = await WildSync.FileUpload.uploadFile(file);
+                    hideUploadProgress();
+                    displayUploadedFile(file, result);
+                    updateAnalysisStatus();
+                } catch (error) {
+                    hideUploadProgress();
+                    console.error('Upload failed:', error);
+                }
+            }
+
+            function showUploadProgress() {
+                uploadProgress.classList.remove('d-none');
+            }
+
+            function hideUploadProgress() {
+                uploadProgress.classList.add('d-none');
+            }
+
+            function displayUploadedFile(file, result) {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'uploaded-file';
+                fileDiv.innerHTML = `
+                    <div class="file-info">
+                        <strong>${file.name}</strong>
+                        <small>${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                    </div>
+                    <div class="file-status">✅ Uploaded</div>
+                `;
+                uploadedFiles.appendChild(fileDiv);
+            }
+
+            function updateAnalysisStatus() {
+                const analysisContent = document.getElementById('analysis-content');
+                analysisContent.innerHTML = `
+                    <div class="analysis-status">
+                        <p>✅ Data uploaded successfully! Ready for analysis.</p>
+                        <button class="btn btn-primary" onclick="startAnalysis()">Start Analysis</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Analysis functionality
+        async function startAnalysis() {
+            const analysisContent = document.getElementById('analysis-content');
+            const analysisResults = document.getElementById('analysis-results');
+            
+            try {
+                WildSync.Utils.showLoading(analysisContent);
+                
+                // Simulate analysis API call
+                // const result = await WildSync.API.analysis.start(forestId);
+                
+                // Mock analysis results for demonstration
+                setTimeout(() => {
+                    analysisContent.classList.add('d-none');
+                    analysisResults.classList.remove('d-none');
+                    
+                    // Initialize charts
+                    createCompletenessChart();
+                    displayRiskMetrics();
+                    displayRecommendations();
+                    
+                    WildSync.Utils.showAlert('Analysis completed successfully!', 'success');
+                }, 2000);
+                
+            } catch (error) {
+                WildSync.Utils.showAlert('Analysis failed. Please try again.', 'error');
+            }
+        }
+
+        function createCompletenessChart() {
+            const ctx = document.getElementById('completeness-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Complete', 'Missing'],
+                    datasets: [{
+                        data: [75, 25],
+                        backgroundColor: ['#7fb069', '#e9ecef'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayRiskMetrics() {
+            document.getElementById('risk-metrics').innerHTML = `
+                <div class="risk-metric">
+                    <span class="risk-label">🔴 High Risk Zones</span>
+                    <span class="risk-value">3</span>
+                </div>
+                <div class="risk-metric">
+                    <span class="risk-label">🟡 Medium Risk Zones</span>
+                    <span class="risk-value">7</span>
+                </div>
+                <div class="risk-metric">
+                    <span class="risk-label">🟢 Low Risk Zones</span>
+                    <span class="risk-value">12</span>
+                </div>
+            `;
+        }
+
+        function displayRecommendations() {
+            document.getElementById('ai-recommendations').innerHTML = `
+                <div class="recommendation">
+                    <h5>🌳 Forest Health</h5>
+                    <p>Implement selective thinning in high-density areas to reduce fire risk and improve forest health.</p>
+                </div>
+                <div class="recommendation">
+                    <h5>🦎 Wildlife Protection</h5>
+                    <p>Establish buffer zones around identified wildlife corridors to maintain ecosystem connectivity.</p>
+                </div>
+                <div class="recommendation">
+                    <h5>💧 Water Management</h5>
+                    <p>Install water retention systems in areas with declining soil moisture levels.</p>
+                </div>
+            `;
+        }
+
+        // Chatbot functionality
+        function initChatbot() {
+            WildSync.ChatManager.init('chat-container');
+        }
+
+        // Maps functionality
+        let map = null;
+
+        function initMaps() {
+            // Map will be initialized when section is shown
+        }
+
+        function initializeMap() {
+            if (map) return; // Already initialized
+            
+            const mapElement = document.getElementById('forest-map');
+            if (!mapElement) return;
+            
+            map = L.map('forest-map').setView([40.7128, -74.0060], 10);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Add sample markers and heat zones
+            addSampleData();
+        }
+
+        function addSampleData() {
+            // Sample forest data points
+            const forestData = [
+                { lat: 40.7128, lng: -74.0060, risk: 'high', type: 'Forest Area A' },
+                { lat: 40.7580, lng: -73.9855, risk: 'medium', type: 'Forest Area B' },
+                { lat: 40.6892, lng: -74.0445, risk: 'low', type: 'Forest Area C' }
+            ];
+
+            forestData.forEach(point => {
+                const color = point.risk === 'high' ? 'red' : 
+                             point.risk === 'medium' ? 'orange' : 'green';
+                
+                L.circle([point.lat, point.lng], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.3,
+                    radius: 1000
+                }).addTo(map).bindPopup(`
+                    <b>${point.type}</b><br>
+                    Risk Level: ${point.risk}<br>
+                    Click for detailed analysis
+                `);
+            });
+        }
+
+        // Load overview data
+        async function loadOverviewData() {
+            try {
+                // Mock data for demonstration
+                document.getElementById('total-forests').textContent = '5';
+                document.getElementById('total-analyses').textContent = '12';
+                document.getElementById('risk-zones').textContent = '3';
+                document.getElementById('data-completeness').textContent = '75%';
+
+                document.getElementById('recent-activity').innerHTML = `
+                    <div class="activity-item">
+                        <span class="activity-icon">📊</span>
+                        <span class="activity-text">Analysis completed for Northern Forest Reserve</span>
+                        <span class="activity-time">2 hours ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <span class="activity-icon">📁</span>
+                        <span class="activity-text">Wildlife survey data uploaded</span>
+                        <span class="activity-time">1 day ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <span class="activity-icon">🤖</span>
+                        <span class="activity-text">AI recommendation: Implement water conservation measures</span>
+                        <span class="activity-time">2 days ago</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Failed to load overview data:', error);
+            }
+        }
+    </script>
+
+    <style>
+        /* Dashboard-specific styles */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-green);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .stat-label {
+            color: var(--medium-gray);
+            font-size: 0.9rem;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--light-gray);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-green);
+            width: 0%;
+            animation: progress 2s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        .uploaded-file {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm);
+            background: var(--light-green);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: var(--spacing-sm) 0;
+            border-bottom: 1px solid var(--light-green);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            margin-right: var(--spacing-md);
+            font-size: 1.2rem;
+        }
+
+        .activity-text {
+            flex: 1;
+        }
+
+        .activity-time {
+            color: var(--medium-gray);
+            font-size: 0.8rem;
+        }
+
+        .risk-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+        }
+
+        .recommendation {
+            background: var(--light-green);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .recommendation h5 {
+            margin-bottom: var(--spacing-xs);
+            color: var(--primary-green);
+        }
+
+        .report-type {
+            background: var(--white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            height: 100%;
+        }
+
+        .report-type h4 {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .report-type p {
+            margin-bottom: var(--spacing-lg);
+            color: var(--medium-gray);
+        }
+
+        #forest-map {
+            height: 400px;
+            width: 100%;
+            border-radius: var(--border-radius);
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                margin-bottom: var(--spacing-lg);
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+            
+            .quick-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>

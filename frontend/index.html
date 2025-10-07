@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WildSync - AI-Powered Forest Management System</title>
+    <meta name="description" content="An intelligent platform that helps forest departments analyze ecosystem data and make data-driven conservation decisions.">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="static/css/main.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌲</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <div class="logo-icon">🌲</div>
+                    <span>WildSync</span>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="community.html">Community</a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    <span id="user-profile" class="d-none"></span>
+                    <a href="login.html" class="btn btn-light" id="login-btn">Login</a>
+                    <a href="register.html" class="btn btn-outline" id="register-btn">Sign Up</a>
+                    <a href="dashboard.html" class="btn btn-light d-none" id="dashboard-btn">Dashboard</a>
+                    <button class="btn btn-light d-none" id="logout-btn">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>AI-Powered Forest Management</h1>
+            <p>Revolutionize forest conservation with intelligent data analysis, interactive heat maps, and AI-generated insights for optimal resource allocation and wildlife protection.</p>
+            <div class="hero-actions">
+                <a href="register.html" class="btn btn-light btn-lg">Get Started Free</a>
+                <a href="#features" class="btn btn-outline btn-lg">Learn More</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>Comprehensive Forest Management Tools</h2>
+                <p>Everything you need to make data-driven conservation decisions</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-icon">📊</div>
+                        <h3 class="card-title">Data Analysis</h3>
+                        <p>Upload forest data including tree counts, animal populations, soil quality, and calamity history. Our AI analyzes patterns and identifies critical areas for intervention.</p>
+                    </div>
+                </div>
+                
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-icon">🗺️</div>
+                        <h3 class="card-title">Interactive Heat Maps</h3>
+                        <p>Visualize ecosystem health with dynamic heat maps showing risk zones, biodiversity hotspots, and resource distribution across your forest areas.</p>
+                    </div>
+                </div>
+                
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-icon">🤖</div>
+                        <h3 class="card-title">AI Recommendations</h3>
+                        <p>Get personalized recommendations for resource allocation, conservation strategies, and wildlife protection based on your specific forest conditions.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-icon">📁</div>
+                        <h3 class="card-title">Multi-Format Upload</h3>
+                        <p>Support for CSV, Excel, PDF documents, and images with GPS data. Easy drag-and-drop interface for quick data import and processing.</p>
+                    </div>
+                </div>
+                
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-icon">💬</div>
+                        <h3 class="card-title">Expert Chatbot</h3>
+                        <p>Get instant answers to forest management questions from our AI chatbot trained on conservation best practices and scientific literature.</p>
+                    </div>
+                </div>
+                
+                <div class="col-4">
+                    <div class="card text-center">
+                        <div class="card-icon">🌐</div>
+                        <h3 class="card-title">Community Hub</h3>
+                        <p>Connect with other forest professionals, share case studies, and learn from successful conservation projects worldwide.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2>How WildSync Works</h2>
+                <p>Four simple steps to smarter forest management</p>
+            </div>
+            
+            <div class="row">
+                <div class="col-3">
+                    <div class="step-card text-center">
+                        <div class="step-number">1</div>
+                        <h4>Upload Data</h4>
+                        <p>Import your forest data including tree surveys, wildlife counts, soil analysis, and historical records.</p>
+                    </div>
+                </div>
+                
+                <div class="col-3">
+                    <div class="step-card text-center">
+                        <div class="step-number">2</div>
+                        <h4>AI Analysis</h4>
+                        <p>Our advanced AI algorithms analyze your data to identify patterns, risks, and opportunities.</p>
+                    </div>
+                </div>
+                
+                <div class="col-3">
+                    <div class="step-card text-center">
+                        <div class="step-number">3</div>
+                        <h4>Visualize Insights</h4>
+                        <p>View interactive heat maps and charts showing ecosystem health, risk zones, and resource distribution.</p>
+                    </div>
+                </div>
+                
+                <div class="col-3">
+                    <div class="step-card text-center">
+                        <div class="step-number">4</div>
+                        <h4>Take Action</h4>
+                        <p>Implement AI-generated recommendations for conservation strategies and resource allocation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container text-center">
+            <h2>Ready to Transform Your Forest Management?</h2>
+            <p>Join forest departments worldwide using WildSync to make smarter conservation decisions.</p>
+            <div class="cta-actions">
+                <a href="register.html" class="btn btn-primary btn-lg">Start Free Trial</a>
+                <a href="mailto:info@wildsync.com" class="btn btn-secondary btn-lg">Contact Sales</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-4">
+                    <div class="logo mb-3">
+                        <div class="logo-icon">🌲</div>
+                        <span>WildSync</span>
+                    </div>
+                    <p>AI-powered forest management for sustainable conservation and wildlife protection.</p>
+                </div>
+                
+                <div class="col-2">
+                    <h5>Product</h5>
+                    <ul class="footer-links">
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-2">
+                    <h5>Community</h5>
+                    <ul class="footer-links">
+                        <li><a href="community.html">Forum</a></li>
+                        <li><a href="community.html#case-studies">Case Studies</a></li>
+                        <li><a href="community.html#resources">Resources</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-2">
+                    <h5>Support</h5>
+                    <ul class="footer-links">
+                        <li><a href="mailto:help@wildsync.com">Help Center</a></li>
+                        <li><a href="mailto:contact@wildsync.com">Contact Us</a></li>
+                        <li><a href="#documentation">Documentation</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-2">
+                    <h5>Legal</h5>
+                    <ul class="footer-links">
+                        <li><a href="#privacy">Privacy Policy</a></li>
+                        <li><a href="#terms">Terms of Service</a></li>
+                        <li><a href="#cookies">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 WildSync. All rights reserved. Made with 💚 for forest conservation.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="static/js/main.js"></script>
+    <script>
+        // Initialize logout functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    WildSync.Auth.logout();
+                });
+            }
+        });
+    </script>
+
+    <style>
+        /* Additional styles for homepage */
+        .features {
+            padding: var(--spacing-xxl) 0;
+            background-color: var(--light-gray);
+        }
+
+        .how-it-works {
+            padding: var(--spacing-xxl) 0;
+        }
+
+        .step-card {
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-green);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0 auto var(--spacing-md);
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--secondary-green) 0%, var(--accent-green) 100%);
+            color: var(--white);
+            padding: var(--spacing-xxl) 0;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            color: var(--white);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .cta-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin-top: var(--spacing-xl);
+        }
+
+        .footer {
+            background: var(--primary-green);
+            color: var(--white);
+            padding: var(--spacing-xxl) 0 var(--spacing-xl);
+        }
+
+        .footer h5 {
+            color: var(--white);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .footer-links a {
+            color: var(--light-green);
+        }
+
+        .footer-links a:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: var(--spacing-xl);
+            margin-top: var(--spacing-xl);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--light-green);
+        }
+
+        @media (max-width: 768px) {
+            .cta-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cta-actions .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</body>
+</html>

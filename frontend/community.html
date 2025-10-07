@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - WildSync</title>
+    <meta name="description" content="Connect with forest professionals worldwide, share knowledge, and learn from conservation success stories.">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="static/css/main.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌲</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <div class="logo-icon">🌲</div>
+                    <a href="index.html" style="color: inherit; text-decoration: none;">
+                        <span>WildSync</span>
+                    </a>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="community.html">Community</a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    <span id="user-profile" class="d-none"></span>
+                    <a href="login.html" class="btn btn-light" id="login-btn">Login</a>
+                    <a href="register.html" class="btn btn-outline" id="register-btn">Sign Up</a>
+                    <a href="dashboard.html" class="btn btn-light d-none" id="dashboard-btn">Dashboard</a>
+                    <button class="btn btn-light d-none" id="logout-btn">Logout</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Community Hero -->
+    <section class="community-hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Forest Management Community</h1>
+                <p>Connect with professionals worldwide, share knowledge, and learn from successful conservation projects.</p>
+                <div class="community-stats">
+                    <div class="stat">
+                        <div class="stat-number">2,847</div>
+                        <div class="stat-label">Community Members</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">Case Studies</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">4,231</div>
+                        <div class="stat-label">Forum Posts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <section class="community-nav">
+        <div class="container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="forum">💬 Forum</button>
+                <button class="nav-tab" data-tab="case-studies">📚 Case Studies</button>
+                <button class="nav-tab" data-tab="resources">📖 Resources</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forum Section -->
+    <section id="forum-section" class="community-section active">
+        <div class="container">
+            <div class="row">
+                <!-- Forum Categories -->
+                <div class="col-3">
+                    <div class="forum-sidebar">
+                        <h3>Categories</h3>
+                        <ul class="category-list">
+                            <li><a href="#" class="category-link active" data-category="">🌍 All Discussions</a></li>
+                            <li><a href="#" class="category-link" data-category="conservation">🌳 Conservation Strategies</a></li>
+                            <li><a href="#" class="category-link" data-category="wildlife">🦉 Wildlife Management</a></li>
+                            <li><a href="#" class="category-link" data-category="technology">💻 Forest Technology</a></li>
+                            <li><a href="#" class="category-link" data-category="policy">📋 Policy & Regulations</a></li>
+                            <li><a href="#" class="category-link" data-category="research">🔬 Research & Data</a></li>
+                            <li><a href="#" class="category-link" data-category="emergency">🚨 Emergency Response</a></li>
+                        </ul>
+
+                        <div class="create-post-section" id="create-post-section" style="display: none;">
+                            <h4>Create New Post</h4>
+                            <form id="create-post-form">
+                                <div class="form-group">
+                                    <input type="text" name="title" placeholder="Post title..." class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <select name="category" class="form-control" required>
+                                        <option value="">Select Category</option>
+                                        <option value="conservation">Conservation Strategies</option>
+                                        <option value="wildlife">Wildlife Management</option>
+                                        <option value="technology">Forest Technology</option>
+                                        <option value="policy">Policy & Regulations</option>
+                                        <option value="research">Research & Data</option>
+                                        <option value="emergency">Emergency Response</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <textarea name="content" placeholder="Share your thoughts..." class="form-control" rows="6" required></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-primary">Post Discussion</button>
+                                    <button type="button" class="btn btn-secondary" onclick="cancelPost()">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forum Posts -->
+                <div class="col-9">
+                    <div class="forum-header">
+                        <h2>Community Discussions</h2>
+                        <button class="btn btn-primary" onclick="showCreatePost()" id="new-post-btn">+ New Discussion</button>
+                    </div>
+
+                    <div id="forum-posts" class="forum-posts">
+                        <!-- Posts will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Case Studies Section -->
+    <section id="case-studies-section" class="community-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Conservation Success Stories</h2>
+                <p>Learn from successful forest management projects around the world</p>
+            </div>
+
+            <div class="filters mb-4">
+                <div class="filter-group">
+                    <label>Filter by Location:</label>
+                    <select id="location-filter" class="form-control">
+                        <option value="">All Locations</option>
+                        <option value="north-america">North America</option>
+                        <option value="south-america">South America</option>
+                        <option value="europe">Europe</option>
+                        <option value="asia">Asia</option>
+                        <option value="africa">Africa</option>
+                        <option value="oceania">Oceania</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="case-studies-grid" class="case-studies-grid">
+                <!-- Case studies will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section id="resources-section" class="community-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Forest Management Resources</h2>
+                <p>Essential guides, tools, and references for forest professionals</p>
+            </div>
+
+            <div class="resources-grid">
+                <div class="resource-category">
+                    <div class="resource-icon">📖</div>
+                    <h3>Best Practice Guides</h3>
+                    <ul class="resource-list">
+                        <li><a href="#guide1">Sustainable Forest Management Guidelines</a></li>
+                        <li><a href="#guide2">Wildlife Habitat Conservation Manual</a></li>
+                        <li><a href="#guide3">Fire Prevention and Management</a></li>
+                        <li><a href="#guide4">Climate Change Adaptation Strategies</a></li>
+                        <li><a href="#guide5">Community Engagement in Conservation</a></li>
+                    </ul>
+                </div>
+
+                <div class="resource-category">
+                    <div class="resource-icon">🔧</div>
+                    <h3>Tools & Software</h3>
+                    <ul class="resource-list">
+                        <li><a href="#tool1">Forest Inventory Apps</a></li>
+                        <li><a href="#tool2">GIS Mapping Software</a></li>
+                        <li><a href="#tool3">Species Identification Tools</a></li>
+                        <li><a href="#tool4">Carbon Footprint Calculators</a></li>
+                        <li><a href="#tool5">Drone Survey Guidelines</a></li>
+                    </ul>
+                </div>
+
+                <div class="resource-category">
+                    <div class="resource-icon">📊</div>
+                    <h3>Research & Data</h3>
+                    <ul class="resource-list">
+                        <li><a href="#data1">Global Forest Watch Data</a></li>
+                        <li><a href="#data2">Climate Impact Studies</a></li>
+                        <li><a href="#data3">Biodiversity Databases</a></li>
+                        <li><a href="#data4">Forest Health Indicators</a></li>
+                        <li><a href="#data5">Conservation Success Metrics</a></li>
+                    </ul>
+                </div>
+
+                <div class="resource-category">
+                    <div class="resource-icon">📋</div>
+                    <h3>Policy & Legal</h3>
+                    <ul class="resource-list">
+                        <li><a href="#policy1">International Forest Agreements</a></li>
+                        <li><a href="#policy2">National Forest Policies</a></li>
+                        <li><a href="#policy3">Indigenous Rights Guidelines</a></li>
+                        <li><a href="#policy4">Environmental Compliance</a></li>
+                        <li><a href="#policy5">Funding & Grant Opportunities</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="static/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize community features
+            initNavTabs();
+            initForumCategories();
+            initCreatePostForm();
+            
+            // Load initial content
+            await loadForumPosts();
+            await loadCaseStudies();
+
+            // Set up logout if user is logged in
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    WildSync.Auth.logout();
+                });
+            }
+        });
+
+        // Navigation tabs
+        function initNavTabs() {
+            const navTabs = document.querySelectorAll('.nav-tab');
+            const sections = document.querySelectorAll('.community-section');
+
+            navTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Update active tab
+                    navTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    // Show corresponding section
+                    const targetSection = tab.dataset.tab;
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === targetSection + '-section') {
+                            section.classList.add('active');
+                        }
+                    });
+                });
+            });
+        }
+
+        // Forum categories
+        function initForumCategories() {
+            const categoryLinks = document.querySelectorAll('.category-link');
+
+            categoryLinks.forEach(link => {
+                link.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    
+                    // Update active category
+                    categoryLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    // Load posts for category
+                    const category = link.dataset.category;
+                    await loadForumPosts(category);
+                });
+            });
+        }
+
+        // Create post form
+        function initCreatePostForm() {
+            const form = document.getElementById('create-post-form');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await createPost(form);
+                });
+            }
+        }
+
+        function showCreatePost() {
+            if (!WildSync.Auth.isLoggedIn()) {
+                WildSync.Utils.showAlert('Please log in to create a post.', 'warning');
+                return;
+            }
+            
+            document.getElementById('create-post-section').style.display = 'block';
+            document.getElementById('new-post-btn').style.display = 'none';
+        }
+
+        function cancelPost() {
+            document.getElementById('create-post-section').style.display = 'none';
+            document.getElementById('new-post-btn').style.display = 'inline-block';
+            document.getElementById('create-post-form').reset();
+        }
+
+        async function createPost(form) {
+            try {
+                const formData = new FormData(form);
+                const title = formData.get('title');
+                const content = formData.get('content');
+                const category = formData.get('category');
+
+                await WildSync.API.community.createPost(title, content, category);
+                
+                WildSync.Utils.showAlert('Post created successfully!', 'success');
+                cancelPost();
+                await loadForumPosts(); // Reload posts
+            } catch (error) {
+                WildSync.Utils.showAlert('Failed to create post. Please try again.', 'error');
+                console.error('Create post error:', error);
+            }
+        }
+
+        // Load forum posts
+        async function loadForumPosts(category = null) {
+            const postsContainer = document.getElementById('forum-posts');
+            
+            try {
+                WildSync.Utils.showLoading(postsContainer);
+                
+                // Mock data for demonstration
+                const mockPosts = [
+                    {
+                        post_id: 1,
+                        title: "Best practices for reforestation in tropical climates?",
+                        content: "I'm working on a reforestation project in Southeast Asia and looking for advice on species selection and planting techniques...",
+                        category: "conservation",
+                        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+                        author: "Dr. Sarah Chen",
+                        replies: 12
+                    },
+                    {
+                        post_id: 2,
+                        title: "Wildlife corridor design for fragmented forests",
+                        content: "Has anyone had success with creating wildlife corridors? Looking for design principles and case studies...",
+                        category: "wildlife",
+                        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+                        author: "Mark Rodriguez",
+                        replies: 8
+                    },
+                    {
+                        post_id: 3,
+                        title: "Using drones for forest monitoring - equipment recommendations?",
+                        content: "Planning to implement drone-based forest monitoring. What equipment and software do you recommend?",
+                        category: "technology",
+                        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+                        author: "Jennifer Park",
+                        replies: 15
+                    }
+                ];
+
+                const filteredPosts = category ? 
+                    mockPosts.filter(post => post.category === category) : 
+                    mockPosts;
+
+                displayForumPosts(filteredPosts);
+                
+            } catch (error) {
+                postsContainer.innerHTML = '<p>Failed to load forum posts. Please try again later.</p>';
+                console.error('Failed to load forum posts:', error);
+            }
+        }
+
+        function displayForumPosts(posts) {
+            const postsContainer = document.getElementById('forum-posts');
+            
+            if (posts.length === 0) {
+                postsContainer.innerHTML = '<p class="text-center">No posts found in this category.</p>';
+                return;
+            }
+
+            postsContainer.innerHTML = posts.map(post => `
+                <div class="forum-post">
+                    <div class="post-header">
+                        <h4 class="post-title">${post.title}</h4>
+                        <div class="post-category">${getCategoryLabel(post.category)}</div>
+                    </div>
+                    <div class="post-content">${post.content}</div>
+                    <div class="post-footer">
+                        <div class="post-author">👤 ${post.author}</div>
+                        <div class="post-time">${WildSync.Utils.formatDate(post.timestamp)}</div>
+                        <div class="post-replies">💬 ${post.replies} replies</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getCategoryLabel(category) {
+            const categories = {
+                conservation: '🌳 Conservation',
+                wildlife: '🦉 Wildlife',
+                technology: '💻 Technology',
+                policy: '📋 Policy',
+                research: '🔬 Research',
+                emergency: '🚨 Emergency'
+            };
+            return categories[category] || '🌍 General';
+        }
+
+        // Load case studies
+        async function loadCaseStudies() {
+            const gridContainer = document.getElementById('case-studies-grid');
+            
+            try {
+                // Mock data for demonstration
+                const mockCaseStudies = [
+                    {
+                        case_id: 1,
+                        title: "Costa Rica's Payment for Ecosystem Services",
+                        location: "Costa Rica, Central America",
+                        success_metrics: {
+                            forest_coverage_increase: "24%",
+                            carbon_sequestration: "2.3M tons CO2",
+                            biodiversity_improvement: "35%"
+                        },
+                        description: "How Costa Rica reversed deforestation through innovative payment schemes for landowners."
+                    },
+                    {
+                        case_id: 2,
+                        title: "German Sustainable Forest Management",
+                        location: "Black Forest, Germany",
+                        success_metrics: {
+                            sustainable_yield: "15% increase",
+                            species_diversity: "40+ species maintained",
+                            economic_value: "€500M annually"
+                        },
+                        description: "Multi-generational forest management balancing conservation and economic needs."
+                    },
+                    {
+                        case_id: 3,
+                        title: "Australian Fire Recovery Program",
+                        location: "Blue Mountains, Australia",
+                        success_metrics: {
+                            area_restored: "50,000 hectares",
+                            species_recovered: "120+ native species",
+                            fire_resistance: "70% improvement"
+                        },
+                        description: "Post-wildfire restoration using native species and community engagement."
+                    }
+                ];
+
+                displayCaseStudies(mockCaseStudies);
+                
+            } catch (error) {
+                gridContainer.innerHTML = '<p>Failed to load case studies. Please try again later.</p>';
+                console.error('Failed to load case studies:', error);
+            }
+        }
+
+        function displayCaseStudies(caseStudies) {
+            const gridContainer = document.getElementById('case-studies-grid');
+            
+            gridContainer.innerHTML = caseStudies.map(study => `
+                <div class="case-study-card">
+                    <div class="case-study-header">
+                        <h3>${study.title}</h3>
+                        <div class="case-study-location">📍 ${study.location}</div>
+                    </div>
+                    <div class="case-study-description">${study.description}</div>
+                    <div class="case-study-metrics">
+                        <h4>Success Metrics:</h4>
+                        <ul>
+                            ${Object.entries(study.success_metrics).map(([key, value]) => 
+                                `<li><strong>${key.replace(/_/g, ' ')}:</strong> ${value}</li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline">Read Full Study</button>
+                </div>
+            `).join('');
+        }
+    </script>
+
+    <style>
+        /* Community-specific styles */
+        .community-hero {
+            background: linear-gradient(135deg, var(--secondary-green) 0%, var(--accent-green) 100%);
+            color: var(--white);
+            padding: var(--spacing-xl) 0;
+            text-align: center;
+        }
+
+        .community-hero h1 {
+            color: var(--white);
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .community-stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xxl);
+            margin-top: var(--spacing-xl);
+        }
+
+        .community-stats .stat {
+            text-align: center;
+        }
+
+        .community-stats .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .community-stats .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .community-nav {
+            background: var(--white);
+            border-bottom: 1px solid var(--light-green);
+            padding: var(--spacing-md) 0;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .nav-tab {
+            background: none;
+            border: none;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab:hover {
+            background: var(--light-green);
+        }
+
+        .nav-tab.active {
+            background: var(--accent-green);
+            color: var(--white);
+        }
+
+        .community-section {
+            display: none;
+            padding: var(--spacing-xl) 0;
+        }
+
+        .community-section.active {
+            display: block;
+        }
+
+        .forum-sidebar {
+            background: var(--white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+        }
+
+        .category-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .category-list li {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .category-link {
+            display: block;
+            padding: var(--spacing-sm);
+            color: var(--medium-gray);
+            text-decoration: none;
+            border-radius: var(--border-radius-sm);
+            transition: all 0.3s ease;
+        }
+
+        .category-link:hover,
+        .category-link.active {
+            background: var(--light-green);
+            color: var(--primary-green);
+        }
+
+        .forum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .forum-post {
+            background: var(--white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .post-title {
+            color: var(--primary-green);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .post-category {
+            background: var(--light-green);
+            color: var(--primary-green);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.8rem;
+        }
+
+        .post-content {
+            margin-bottom: var(--spacing-md);
+            color: var(--dark-gray);
+        }
+
+        .post-footer {
+            display: flex;
+            gap: var(--spacing-lg);
+            font-size: 0.9rem;
+            color: var(--medium-gray);
+        }
+
+        .create-post-section {
+            margin-top: var(--spacing-xl);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--light-green);
+        }
+
+        .case-studies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .case-study-card {
+            background: var(--white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .case-study-header {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .case-study-header h3 {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .case-study-location {
+            color: var(--medium-gray);
+            font-size: 0.9rem;
+        }
+
+        .case-study-description {
+            margin-bottom: var(--spacing-md);
+            color: var(--dark-gray);
+        }
+
+        .case-study-metrics {
+            background: var(--light-green);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .case-study-metrics h4 {
+            margin-bottom: var(--spacing-sm);
+            color: var(--primary-green);
+        }
+
+        .case-study-metrics ul {
+            margin: 0;
+            color: var(--primary-green);
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-lg);
+        }
+
+        .resource-category {
+            background: var(--white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+
+        .resource-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .resource-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .resource-list li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .resource-list a {
+            color: var(--secondary-green);
+            text-decoration: none;
+        }
+
+        .resource-list a:hover {
+            color: var(--primary-green);
+            text-decoration: underline;
+        }
+
+        .filters {
+            display: flex;
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 500;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .section-header h2 {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .section-header p {
+            color: var(--medium-gray);
+        }
+
+        @media (max-width: 768px) {
+            .community-stats {
+                flex-direction: column;
+                gap: var(--spacing-lg);
+            }
+
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+
+            .forum-header {
+                flex-direction: column;
+                gap: var(--spacing-md);
+                align-items: stretch;
+            }
+
+            .post-header {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+            }
+
+            .post-footer {
+                flex-direction: column;
+                gap: var(--spacing-xs);
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - WildSync</title>
+    <meta name="description" content="Login to WildSync to access your forest management dashboard.">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="static/css/main.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌲</text></svg>">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <div class="logo-icon">🌲</div>
+                    <a href="index.html" style="color: inherit; text-decoration: none;">
+                        <span>WildSync</span>
+                    </a>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html#features">Features</a></li>
+                    <li><a href="community.html">Community</a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    <span>Don't have an account?</span>
+                    <a href="register.html" class="btn btn-light">Sign Up</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Login Section -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h1>Welcome Back</h1>
+                        <p>Login to access your forest management dashboard</p>
+                    </div>
+
+                    <form id="login-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" name="email" class="form-control" required autocomplete="email">
+                            <div class="form-error"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" name="password" class="form-control" required autocomplete="current-password">
+                            <div class="form-error"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="remember" id="remember">
+                                <span class="checkbox-text">Remember me</span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg auth-submit">
+                            <span class="btn-text">Login</span>
+                            <div class="btn-spinner d-none">
+                                <div class="spinner"></div>
+                            </div>
+                        </button>
+
+                        <div class="auth-links">
+                            <a href="#forgot-password" class="auth-link">Forgot your password?</a>
+                        </div>
+                    </form>
+
+                    <div class="auth-footer">
+                        <p>Don't have an account? <a href="register.html">Create one here</a></p>
+                    </div>
+                </div>
+
+                <div class="auth-info">
+                    <div class="info-card">
+                        <div class="info-icon">🌿</div>
+                        <h3>Forest Management Made Smart</h3>
+                        <p>Access advanced AI analytics, interactive maps, and expert recommendations to optimize your forest conservation efforts.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">📊</div>
+                        <h3>Data-Driven Insights</h3>
+                        <p>Upload your forest data and get actionable insights powered by machine learning algorithms trained on conservation best practices.</p>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-icon">🤝</div>
+                        <h3>Community Support</h3>
+                        <p>Connect with forest professionals worldwide and learn from successful conservation case studies and expert knowledge.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="static/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const submitBtn = loginForm.querySelector('.auth-submit');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnSpinner = submitBtn.querySelector('.btn-spinner');
+
+            // Form validation rules
+            const validationRules = {
+                email: {
+                    required: true,
+                    email: true
+                },
+                password: {
+                    required: true,
+                    minLength: 6
+                }
+            };
+
+            // Real-time validation
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+
+            emailField.addEventListener('blur', () => {
+                WildSync.FormValidator.validateField(emailField, validationRules.email);
+            });
+
+            passwordField.addEventListener('blur', () => {
+                WildSync.FormValidator.validateField(passwordField, validationRules.password);
+            });
+
+            // Handle form submission
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // Validate form
+                if (!WildSync.FormValidator.validateForm(loginForm, validationRules)) {
+                    return;
+                }
+
+                // Get form data
+                const formData = new FormData(loginForm);
+                const email = formData.get('email');
+                const password = formData.get('password');
+
+                // Show loading state
+                submitBtn.disabled = true;
+                btnText.classList.add('d-none');
+                btnSpinner.classList.remove('d-none');
+
+                try {
+                    // Attempt login
+                    const success = await WildSync.Auth.login(email, password);
+                    
+                    if (success) {
+                        // Redirect to dashboard on success
+                        window.location.href = 'dashboard.html';
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    WildSync.Utils.showAlert('Login failed. Please check your credentials and try again.', 'error');
+                } finally {
+                    // Reset button state
+                    submitBtn.disabled = false;
+                    btnText.classList.remove('d-none');
+                    btnSpinner.classList.add('d-none');
+                }
+            });
+
+            // Redirect if already logged in
+            if (WildSync.Auth.isLoggedIn()) {
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+
+    <style>
+        /* Auth page styles */
+        .auth-section {
+            padding: var(--spacing-xl) 0;
+            background-color: var(--light-gray);
+            min-height: calc(100vh - 100px);
+        }
+
+        .auth-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xxl);
+            align-items: start;
+        }
+
+        .auth-card {
+            background: var(--white);
+            padding: var(--spacing-xxl);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .auth-header h1 {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .auth-header p {
+            color: var(--medium-gray);
+            margin-bottom: 0;
+        }
+
+        .auth-form .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: var(--spacing-sm);
+            transform: scale(1.1);
+        }
+
+        .auth-submit {
+            width: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .auth-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-spinner .spinner {
+            width: 20px;
+            height: 20px;
+            border-width: 2px;
+        }
+
+        .auth-links {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .auth-link {
+            color: var(--secondary-green);
+            font-size: 0.9rem;
+        }
+
+        .auth-footer {
+            text-align: center;
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid #e9ecef;
+            color: var(--medium-gray);
+        }
+
+        .auth-footer a {
+            color: var(--primary-green);
+            font-weight: 500;
+        }
+
+        .auth-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
+
+        .info-card {
+            background: var(--white);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+        }
+
+        .info-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .info-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .info-card p {
+            color: var(--medium-gray);
+            margin-bottom: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+
+            .auth-card {
+                padding: var(--spacing-xl);
+            }
+
+            .auth-info {
+                order: -1;
+            }
+
+            .info-card {
+                padding: var(--spacing-md);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-section {
+                padding: var(--spacing-md) 0;
+            }
+
+            .auth-card {
+                padding: var(--spacing-lg);
+            }
+
+            .auth-header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</body>
+</html>
