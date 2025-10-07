@@ -1,0 +1,9 @@
+::1 - - [07/Oct/2025 23:34:56] "GET / HTTP/1.1" 200 -
+::1 - - [07/Oct/2025 23:34:56] "GET /static/css/main.css HTTP/1.1" 200 -
+::1 - - [07/Oct/2025 23:34:56] "GET /static/js/config.js HTTP/1.1" 200 -
+::1 - - [07/Oct/2025 23:34:56] "GET /static/js/main.js HTTP/1.1" 200 -
+::1 - - [07/Oct/2025 23:35:04] "GET /register.html HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [07/Oct/2025 23:35:18] "GET / HTTP/1.1" 200 -
+::ffff:127.0.0.1 - - [07/Oct/2025 23:35:23] "GET /static/js/config.js HTTP/1.1" 200 -
+::1 - - [07/Oct/2025 23:36:20] "GET /login.html HTTP/1.1" 200 -
+::1 - - [07/Oct/2025 23:39:06] "GET /register.html HTTP/1.1" 304 -

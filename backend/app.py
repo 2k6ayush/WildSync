@@ -70,6 +70,26 @@ def create_app(config_class: type = Config) -> Flask:
 
     register_blueprints(app)
 
+    # Optionally auto-create DB tables and seed data on first run (for containerized deploys)
+    if os.getenv("DB_AUTOCREATE", "false").lower() in ("1", "true", "yes", "y"): 
+        try:
+            # Ensure models are imported so SQLAlchemy knows all tables
+            from . import models  # noqa: F401
+            with app.app_context():
+                db.create_all()
+            logger.info("DB_AUTOCREATE: created all tables (or already existed)")
+        except Exception as e:
+            logger.warning("DB_AUTOCREATE failed: %s", e)
+
+    if os.getenv("DB_SEED", "false").lower() in ("1", "true", "yes", "y"):
+        try:
+            from .cli import seed  # type: ignore
+            with app.app_context():
+                seed()
+            logger.info("DB_SEED: seeding completed or already present")
+        except Exception as e:
+            logger.warning("DB_SEED failed: %s", e)
+
     # CLI commands
     try:
         from .cli import register_cli  # noqa: WPS433

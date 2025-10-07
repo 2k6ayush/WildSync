@@ -62,3 +62,52 @@ The generator also respects API_BASE if FRONTEND_API_BASE is not set.
 ### Notes
 - For cross-origin dev (frontend 8080, backend 5000), CORS with credentials is enabled in the backend. Ensure Flask session cookie settings are compatible for your environment.
 - Update frontend/static/js/config.js is not needed manually; the script regenerates it.
+
+---
+
+## Production-like deployment with Docker
+
+This repo includes a simple containerized stack for running the full application (frontend + backend + PostgreSQL) behind a single origin using nginx.
+
+Prerequisites:
+- Docker Desktop installed and running
+
+Steps:
+1. Copy environment template and set secrets
+   ```powershell
+   Copy-Item .env.example .env
+   # Edit .env and set at least:
+   # - POSTGRES_PASSWORD (required)
+   # - FLASK_SECRET_KEY (required)
+   # - DB_SEED=1 (optional, seeds admin user)
+   # - OPENAI_API_KEY (optional, enables chatbot)
+   ```
+
+2. Build and start the stack
+   ```powershell
+   docker compose build
+   docker compose up -d
+   ```
+
+3. Access the app
+   - Frontend: http://localhost
+   - Backend health: http://localhost:8000/api/health
+
+4. First-run behavior
+   - Backend starts with gunicorn on port 8000
+   - DB_AUTOCREATE=1 creates tables on first run
+   - If DB_SEED=1 is set in .env, the database is seeded with:
+     - Email: admin@wildsync.local
+     - Password: ChangeMe123!
+
+5. Stopping and removing
+   ```powershell
+   docker compose down
+   # Keep DB data:
+   # docker compose down --volumes  # removes db data
+   ```
+
+Notes:
+- nginx serves the static frontend and reverse proxies /api/* to the backend, so the browser sees a single origin (no CORS issues).
+- Update OPENAI_API_KEY in .env to enable chatbot features.
+- For HTTPS in production, place this stack behind a TLS terminator (e.g., a cloud load balancer) or extend nginx config with certificates.
