@@ -25,6 +25,10 @@ services:
       DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@db:5432/wildsync
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # Local LLM via Ollama (optional)
+      OLLAMA_ENABLED: ${OLLAMA_ENABLED:-0}
+      OLLAMA_HOST: ${OLLAMA_HOST:-ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral}
       DB_AUTOCREATE: "1"
       DB_SEED: ${DB_SEED:-0}
       FLASK_ENV: production
@@ -33,13 +37,26 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      ollama:
+        condition: service_started
     ports:
       - "8000:8000"
+
+  ollama:
+    image: ollama/ollama:latest
+    # Expose only inside the compose network; no host port mapping needed
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
 
   frontend:
     build:
       context: .
-    dockerfile: nginx/Dockerfile
+      dockerfile: nginx/Dockerfile
     depends_on:
       - backend
     ports:
@@ -47,3 +64,4 @@ services:
 
 volumes:
   pgdata:
+  ollama:

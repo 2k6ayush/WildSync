@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: wildsync-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn -w 2 -k gthread --threads 4 --timeout 120 -b 0.0.0.0:$PORT backend.wsgi:app
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+        # Set this to your Neon Postgres connection string:
+        # postgresql+psycopg://user:password@host:5432/db?sslmode=require
+      - key: FLASK_SECRET_KEY
+        sync: false
+        # Set to a strong random string like: some-random-32-char-string
+      - key: FLASK_ENV
+        value: production
+      - key: DB_AUTOCREATE
+        value: "1"
+      - key: DB_SEED
+        value: "1"
+        # After first successful deploy, change to "0"
+      - key: OLLAMA_ENABLED
+        value: "0"
+      - key: OPENAI_API_KEY
+        value: ""
+        # Optional: add your OpenAI key for AI chatbot (paid)

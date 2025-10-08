@@ -109,5 +109,14 @@ Steps:
 
 Notes:
 - nginx serves the static frontend and reverse proxies /api/* to the backend, so the browser sees a single origin (no CORS issues).
-- Update OPENAI_API_KEY in .env to enable chatbot features.
+- Chatbot options:
+  - OpenAI (paid): set OPENAI_API_KEY in .env.
+  - Local (free): set OLLAMA_ENABLED=1 (and optionally OLLAMA_MODEL) to use a local model via the Ollama service in docker-compose.
 - For HTTPS in production, place this stack behind a TLS terminator (e.g., a cloud load balancer) or extend nginx config with certificates.
+
+### Local LLM via Ollama (free)
+- Enabled by docker-compose service `ollama`.
+- Configure in .env:
+  - OLLAMA_ENABLED=1
+  - OLLAMA_MODEL=mistral (default) or llama3.1:8b (more capable but heavier)
+- First request may take longer if the model needs to be pulled.

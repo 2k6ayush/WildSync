@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
 # Optional wait for a host/port (e.g., Postgres)
 python - <<'PY'

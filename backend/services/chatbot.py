@@ -1,5 +1,6 @@
 import os
 from typing import Tuple, Dict, Optional
+import requests
 from ..extensions import db
 from ..models import ChatHistory, ForestData
 
@@ -25,6 +26,19 @@ def rule_based_reply(message: str, context: Dict) -> str:
     return "Please provide more details about your question or the forest data you're analyzing."
 
 
+def _ollama_generate(prompt: str, model: str, host: str) -> Optional[str]:
+    base = host or "ollama:11434"
+    if base.startswith("http"):
+        url = f"{base.rstrip('/')}/api/generate"
+    else:
+        url = f"http://{base}/api/generate"
+    resp = requests.post(url, json={"model": model, "prompt": prompt, "stream": False}, timeout=120)
+    if resp.ok:
+        j = resp.json()
+        return j.get("response")
+    return None
+
+
 def chat_with_context(user_id: int, message: str, forest_id: Optional[int] = None) -> Tuple[str, Dict]:
     context: Dict = {}
     if forest_id:
@@ -38,6 +52,21 @@ def chat_with_context(user_id: int, message: str, forest_id: Optional[int] = Non
 
     reply = rule_based_reply(message, context)
 
+    # Optional: use local Ollama model if enabled
+    if os.getenv("OLLAMA_ENABLED", "0").lower() in ("1", "true", "yes", "y"):
+        try:
+            model = os.getenv("OLLAMA_MODEL", "mistral")
+            host = os.getenv("OLLAMA_HOST", "ollama:11434")
+            sys = "You are an AI assistant for forest management. Be concise and practical."
+            prompt = f"{sys}\nContext: {context}\nQuestion: {message}\nAnswer:"
+            out = _ollama_generate(prompt, model=model, host=host)
+            if out:
+                reply = out.strip()
+        except Exception:
+            # silently fall back
+            pass
+
+    # Optional: use OpenAI if key provided
     if _OPENAI_AVAILABLE and os.getenv("OPENAI_API_KEY"):
         try:
             client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
