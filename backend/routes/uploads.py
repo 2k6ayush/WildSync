@@ -82,8 +82,10 @@ def upload():
                         text_chunks.append(txt)
                 preview["pages"] = num_pages
                 preview["text_preview"] = ("\n".join(text_chunks))[:1000]
-        except Exception as e:
-            return jsonify({"error": f"Failed to read PDF: {e}"}), 400
+        except Exception:
+            # Gracefully handle scanned/unsupported PDFs: save file without text preview
+            preview["pages"] = None
+            preview["text_preview"] = ""
 
     location_guess = detect_location(file_path=path, exif_coords=coords_from_exif)
 
