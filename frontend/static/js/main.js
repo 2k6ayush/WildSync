@@ -213,67 +213,40 @@ const API = {
 
 // Authentication Manager
 const Auth = {
-    currentUser: null,
+    // Default to a guest user; authentication disabled
+    currentUser: { name: 'Guest' },
 
-    // Check if user is logged in
+    // Always considered logged in (guest)
     isLoggedIn() {
-        return this.currentUser !== null;
+        return true;
     },
 
-    // Initialize auth state
+    // Initialize auth state: no server call
     async init() {
-        try {
-            const profile = await API.auth.getProfile();
-            this.currentUser = profile.user;
-            this.updateUI();
-            return true;
-        } catch (error) {
-            this.currentUser = null;
-            this.updateUI();
-            return false;
-        }
+        this.updateUI();
+        return true;
     },
 
-    // Login user
+    // Login/Register/Logout become no-ops in guest mode
     async login(email, password) {
-        try {
-            const result = await API.auth.login(email, password);
-            this.currentUser = result.user;
-            this.updateUI();
-            Utils.showAlert('Successfully logged in!', 'success');
-            return true;
-        } catch (error) {
-            Utils.showAlert(error.message, 'error');
-            return false;
-        }
+        this.currentUser = { name: 'Guest' };
+        this.updateUI();
+        return true;
     },
 
-    // Register user
     async register(name, email, password) {
-        try {
-            await API.auth.register(name, email, password);
-            Utils.showAlert('Registration successful! Please log in.', 'success');
-            return true;
-        } catch (error) {
-            Utils.showAlert(error.message, 'error');
-            return false;
-        }
+        this.currentUser = { name: 'Guest' };
+        this.updateUI();
+        return true;
     },
 
-    // Logout user
     async logout() {
-        try {
-            await API.auth.logout();
-            this.currentUser = null;
-            this.updateUI();
-            Utils.showAlert('Successfully logged out!', 'success');
-            window.location.href = 'index.html';
-        } catch (error) {
-            Utils.showAlert(error.message, 'error');
-        }
+        this.currentUser = { name: 'Guest' };
+        this.updateUI();
+        window.location.href = 'index.html';
     },
 
-    // Update UI based on auth state
+    // Update UI based on guest state
     updateUI() {
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
@@ -281,35 +254,18 @@ const Auth = {
         const dashboardBtn = document.getElementById('dashboard-btn');
         const userProfile = document.getElementById('user-profile');
 
-        if (this.isLoggedIn()) {
-            // User is logged in
-            if (loginBtn) loginBtn.style.display = 'none';
-            if (registerBtn) registerBtn.style.display = 'none';
-            if (logoutBtn) logoutBtn.style.display = 'inline-block';
-            if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
-            if (userProfile) {
-                userProfile.style.display = 'block';
-                userProfile.textContent = `Welcome, ${this.currentUser.name}`;
-            }
-        } else {
-            // User is not logged in
-            if (loginBtn) loginBtn.style.display = 'inline-block';
-            if (registerBtn) registerBtn.style.display = 'inline-block';
-            if (logoutBtn) logoutBtn.style.display = 'none';
-            if (dashboardBtn) dashboardBtn.style.display = 'none';
-            if (userProfile) userProfile.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (registerBtn) registerBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (dashboardBtn) dashboardBtn.style.display = 'inline-block';
+        if (userProfile) {
+            userProfile.style.display = 'block';
+            userProfile.textContent = `Welcome, ${this.currentUser.name}`;
         }
     },
 
-    // Require authentication for certain pages
+    // No auth required for any page
     requireAuth() {
-        if (!this.isLoggedIn()) {
-            Utils.showAlert('Please log in to access this page.', 'warning');
-            setTimeout(() => {
-                window.location.href = 'login.html';
-            }, 2000);
-            return false;
-        }
         return true;
     }
 };

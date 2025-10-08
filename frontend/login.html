@@ -112,78 +112,9 @@
     <script src="static/js/config.js"></script>
     <script src="static/js/main.js"></script>
     <script>
+        // Login disabled: redirect to dashboard immediately
         document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('login-form');
-            const submitBtn = loginForm.querySelector('.auth-submit');
-            const btnText = submitBtn.querySelector('.btn-text');
-            const btnSpinner = submitBtn.querySelector('.btn-spinner');
-
-            // Form validation rules
-            const validationRules = {
-                email: {
-                    required: true,
-                    email: true
-                },
-                password: {
-                    required: true,
-                    minLength: 6
-                }
-            };
-
-            // Real-time validation
-            const emailField = document.getElementById('email');
-            const passwordField = document.getElementById('password');
-
-            emailField.addEventListener('blur', () => {
-                WildSync.FormValidator.validateField(emailField, validationRules.email);
-            });
-
-            passwordField.addEventListener('blur', () => {
-                WildSync.FormValidator.validateField(passwordField, validationRules.password);
-            });
-
-            // Handle form submission
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                // Validate form
-                if (!WildSync.FormValidator.validateForm(loginForm, validationRules)) {
-                    return;
-                }
-
-                // Get form data
-                const formData = new FormData(loginForm);
-                const email = formData.get('email');
-                const password = formData.get('password');
-
-                // Show loading state
-                submitBtn.disabled = true;
-                btnText.classList.add('d-none');
-                btnSpinner.classList.remove('d-none');
-
-                try {
-                    // Attempt login
-                    const success = await WildSync.Auth.login(email, password);
-                    
-                    if (success) {
-                        // Redirect to dashboard on success
-                        window.location.href = 'dashboard.html';
-                    }
-                } catch (error) {
-                    console.error('Login error:', error);
-                    WildSync.Utils.showAlert('Login failed. Please check your credentials and try again.', 'error');
-                } finally {
-                    // Reset button state
-                    submitBtn.disabled = false;
-                    btnText.classList.remove('d-none');
-                    btnSpinner.classList.add('d-none');
-                }
-            });
-
-            // Redirect if already logged in
-            if (WildSync.Auth.isLoggedIn()) {
-                window.location.href = 'dashboard.html';
-            }
+            window.location.replace('dashboard.html');
         });
     </script>
 
