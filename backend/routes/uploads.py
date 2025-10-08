@@ -5,6 +5,12 @@ from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from ..services.location import detect_location
 
+try:
+    import PyPDF2  # type: ignore
+    _PDF_OK = True
+except Exception:
+    _PDF_OK = False
+
 ALLOWED_EXTENSIONS = {"csv", "xlsx", "xls", "pdf", "png", "jpg", "jpeg"}
 
 uploads_bp = Blueprint("uploads", __name__)
@@ -58,6 +64,26 @@ def upload():
             preview["size"] = img.size
         except Exception as e:
             return jsonify({"error": f"Failed to process image: {e}"}), 400
+    elif ext == "pdf":
+        if not _PDF_OK:
+            return jsonify({"error": "PDF support not installed on server"}), 400
+        try:
+            with open(path, "rb") as f:
+                reader = PyPDF2.PdfReader(f)
+                num_pages = len(reader.pages)
+                text_chunks = []
+                # Extract text from first 2 pages (limited preview)
+                for i in range(min(2, num_pages)):
+                    try:
+                        txt = reader.pages[i].extract_text() or ""
+                    except Exception:
+                        txt = ""
+                    if txt:
+                        text_chunks.append(txt)
+                preview["pages"] = num_pages
+                preview["text_preview"] = ("\n".join(text_chunks))[:1000]
+        except Exception as e:
+            return jsonify({"error": f"Failed to read PDF: {e}"}), 400
 
     location_guess = detect_location(file_path=path, exif_coords=coords_from_exif)
 
