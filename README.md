@@ -7,6 +7,15 @@ https://youtu.be/6qApxHCXO2Y?si=kya8_j0vfhc0Qe5y
 #Try WildSync live!
 https://wildsync.mgx.world
 
+## Architecture
+🗂️ Architecture Diagrams & System Flow
+Explore all project architecture diagrams and flowcharts here:
+🔗 WildSync Architecture Diagrams
+
+Contains detailed system flows, backend/frontend interactions, database schema, and API/data routing for WildSync.
+
+Essential for understanding project structure and technical implementation.
+
 ## Quick Start (Windows PowerShell)
 
 Prerequisites:
