@@ -1,6 +1,12 @@
 # WildSync
 AI-Powered Forest Management System - An intelligent platform that helps forest departments analyze ecosystem data and make data-driven conservation decisions. Upload forest data (tree counts, animal populations, soil quality, location details, past calamities) and get actionable insights through interactive heat maps and AI-generated recommendations for optimal resource allocation and wildlife protection
 
+#Watch our WildSync demo and project pitch here:
+https://youtu.be/6qApxHCXO2Y?si=kya8_j0vfhc0Qe5y
+
+#Try WildSync live!
+https://wildsync.mgx.world
+
 ## Quick Start (Windows PowerShell)
 
 Prerequisites:
