@@ -10,7 +10,7 @@ https://wildsync.mgx.world
 ## Architecture
 🗂️ Architecture Diagrams & System Flow
 Explore all project architecture diagrams and flowcharts here:
-🔗 WildSync Architecture Diagrams
+🔗 WildSync Architecture Diagrams.md
 
 Contains detailed system flows, backend/frontend interactions, database schema, and API/data routing for WildSync.
 
