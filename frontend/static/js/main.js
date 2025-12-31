@@ -36,10 +36,10 @@ const Utils = {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type}`;
         alertDiv.textContent = message;
-        
+
         const targetContainer = container || document.querySelector('.main-content') || document.body;
         targetContainer.insertBefore(alertDiv, targetContainer.firstChild);
-        
+
         // Auto remove after 5 seconds
         setTimeout(() => {
             if (alertDiv.parentNode) {
@@ -82,9 +82,20 @@ const API = {
             credentials: 'include', // For session management
         };
 
+        // Deep merge headers if they exist in options
+        if (options.headers) {
+            options.headers = { ...defaultOptions.headers, ...options.headers };
+        }
+
         const finalOptions = { ...defaultOptions, ...options };
-        
-        if (finalOptions.body && typeof finalOptions.body === 'object') {
+
+        // Handle FormData
+        if (finalOptions.body instanceof FormData) {
+            // Let the browser set the Content-Type header with boundary
+            if (finalOptions.headers && finalOptions.headers['Content-Type']) {
+                delete finalOptions.headers['Content-Type'];
+            }
+        } else if (finalOptions.body && typeof finalOptions.body === 'object') {
             finalOptions.body = JSON.stringify(finalOptions.body);
         }
 
@@ -96,14 +107,14 @@ const API = {
             } catch (e) {
                 // Non-JSON response
             }
-            
+
             if (!response.ok) {
                 const err = new Error((data && data.error) || `HTTP error! status: ${response.status}`);
                 err.status = response.status;
                 err.data = data;
                 throw err;
             }
-            
+
             return data;
         } catch (error) {
             console.error('API Error:', error);
@@ -320,11 +331,11 @@ const FileUpload = {
     async uploadFile(file, progressCallback = null) {
         try {
             if (progressCallback) progressCallback(0);
-            
+
             const result = await API.uploads.upload(file, progressCallback);
-            
+
             if (progressCallback) progressCallback(100);
-            
+
             Utils.showAlert(`File "${file.name}" uploaded successfully!`, 'success');
             return result;
         } catch (error) {
@@ -394,16 +405,16 @@ const ChatManager = {
 
         try {
             const result = await API.chatbot.sendMessage(message);
-            
+
             // Remove typing indicator
             typingDiv.remove();
-            
+
             // Add bot response
             this.addMessage(result.response);
         } catch (error) {
             // Remove typing indicator
             typingDiv.remove();
-            
+
             this.addMessage('Sorry, I encountered an error. Please try again.');
             Utils.showAlert(`Chat error: ${error.message}`, 'error');
         }
@@ -417,7 +428,7 @@ const Navigation = {
         // Add active class to current page
         const currentPage = window.location.pathname.split('/').pop() || 'index.html';
         const navLinks = document.querySelectorAll('.nav-menu a, .sidebar-menu a');
-        
+
         navLinks.forEach(link => {
             const href = link.getAttribute('href');
             if (href === currentPage || (currentPage === '' && href === 'index.html')) {
@@ -428,7 +439,7 @@ const Navigation = {
         // Handle mobile menu toggle (if needed)
         const menuToggle = document.querySelector('.menu-toggle');
         const navMenu = document.querySelector('.nav-menu');
-        
+
         if (menuToggle && navMenu) {
             menuToggle.addEventListener('click', () => {
                 navMenu.classList.toggle('show');
@@ -466,14 +477,14 @@ const FormValidator = {
 
         // Update UI
         this.updateFieldUI(field, errors);
-        
+
         return errors.length === 0;
     },
 
     // Update field UI based on validation
     updateFieldUI(field, errors) {
         const errorContainer = field.parentNode.querySelector('.form-error');
-        
+
         if (errors.length > 0) {
             field.classList.add('error');
             if (errorContainer) {
@@ -490,7 +501,7 @@ const FormValidator = {
     // Validate entire form
     validateForm(form, validationRules) {
         let isValid = true;
-        
+
         for (const fieldName in validationRules) {
             const field = form.querySelector(`[name="${fieldName}"]`);
             if (field) {
@@ -498,7 +509,7 @@ const FormValidator = {
                 if (!fieldValid) isValid = false;
             }
         }
-        
+
         return isValid;
     }
 };
@@ -507,16 +518,16 @@ const FormValidator = {
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize authentication
     await Auth.init();
-    
+
     // Initialize navigation
     Navigation.init();
-    
+
     // Add global error handler
     window.addEventListener('error', (e) => {
         console.error('Global error:', e.error);
         Utils.showAlert('An unexpected error occurred. Please refresh the page.', 'error');
     });
-    
+
     // Add unhandled promise rejection handler
     window.addEventListener('unhandledrejection', (e) => {
         console.error('Unhandled promise rejection:', e.reason);

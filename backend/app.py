@@ -4,6 +4,9 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 import logging
 
+
+load_dotenv()
+
 from .config import Config
 from .extensions import db, migrate, login_manager, mail
 
@@ -57,7 +60,6 @@ def register_blueprints(app: Flask):
 
 
 def create_app(config_class: type = Config) -> Flask:
-    load_dotenv()
     app = Flask(__name__)
     app.config.from_object(config_class)
 

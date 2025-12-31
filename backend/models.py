@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
 from .extensions import db, login_manager
 
 
@@ -50,18 +50,18 @@ class ForestData(db.Model):
     data_id = db.Column(db.Integer, primary_key=True)
     forest_id = db.Column(db.Integer, db.ForeignKey("forests.forest_id"), nullable=False)
     tree_count = db.Column(db.Integer)
-    soil_data = db.Column(JSONB)
-    animal_data = db.Column(JSONB)
-    calamity_history = db.Column(JSONB)
+    soil_data = db.Column(JSON)
+    animal_data = db.Column(JSON)
+    calamity_history = db.Column(JSON)
 
 
 class Analysis(db.Model):
     __tablename__ = "analysis"
     analysis_id = db.Column(db.Integer, primary_key=True)
     forest_id = db.Column(db.Integer, db.ForeignKey("forests.forest_id"), nullable=False)
-    risk_zones = db.Column(JSONB)  # GeoJSON or grid-based structure
-    recommendations = db.Column(JSONB)
-    heat_map_data = db.Column(JSONB)
+    risk_zones = db.Column(JSON)  # GeoJSON or grid-based structure
+    recommendations = db.Column(JSON)
+    heat_map_data = db.Column(JSON)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -80,7 +80,7 @@ class CaseStudy(db.Model):
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
     location = db.Column(db.String(255))
-    success_metrics = db.Column(JSONB)
+    success_metrics = db.Column(JSON)
 
 
 class ForumPost(db.Model):

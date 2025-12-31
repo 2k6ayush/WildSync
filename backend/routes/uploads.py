@@ -23,12 +23,15 @@ def allowed_file(filename: str) -> bool:
 @uploads_bp.post("")
 def upload():
     if "file" not in request.files:
+        print("DEBUG: No file part in request.files")
         return jsonify({"error": "No file part"}), 400
     file = request.files["file"]
     if file.filename == "":
+        print("DEBUG: No selected file (empty filename)")
         return jsonify({"error": "No selected file"}), 400
     if not allowed_file(file.filename):
-        return jsonify({"error": "Unsupported file type"}), 400
+        print(f"DEBUG: Unsupported file type: {file.filename}")
+        return jsonify({"error": f"Unsupported file type. Allowed: {', '.join(sorted(ALLOWED_EXTENSIONS))}"}), 400
 
     filename = secure_filename(file.filename)
     save_dir = current_app.config["UPLOAD_FOLDER"]

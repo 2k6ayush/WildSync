@@ -16,7 +16,7 @@ Set-Location $root
 # Create virtual environment if missing
 if (-not (Test-Path "$root\.venv")) {
   Write-Host "Creating virtual environment (.venv)..." -ForegroundColor Yellow
-  py -m venv .venv
+  python -m venv .venv
 }
 
 # Activate venv
