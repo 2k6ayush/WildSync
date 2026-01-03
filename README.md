@@ -165,6 +165,7 @@ Combines:
 
 ##🔄 Data Pipeline (End-to-End)
 <img width="917" height="263" alt="Screenshot 2026-01-03 150517" src="https://github.com/user-attachments/assets/284db5df-2e08-425e-bf22-909e0f873fb7" />
+
 ##📂 Supported Data Inputs
 
 - CSV
