@@ -226,9 +226,13 @@ Combines:
 - 🏗️ **Technical Architecture & System Diagrams:**  
   [View Architecture Diagrams](./WildSync%20Architecture%20Diagrams.md)
 
-- 🔴 **Live Demo:** https://wildsync.mgx.world  
+- 🔴 **Live Demo (UI Preview):**  
+  https://wildsync.mgx.world  
+  *(This link is for demo/UI preview purposes. The full application is not continuously hosted.  
+  To experience the complete working system, please run the project locally or using Docker as described below.)*
+
 - 🎥 **Demo Video:** https://youtu.be/6qApxHCXO2Y  
-- 🧑‍💻 **GitHub Repository:** https://github.com/2k6ayush/WildSync
+- 🧑‍💻 **GitHub Repository:** https://github.com/2k6ayush/WildSync  
 
  ##👥 Team
 
