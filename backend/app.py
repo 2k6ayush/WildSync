@@ -63,6 +63,14 @@ def create_app(config_class: type = Config) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    db_uri = app.config.get("SQLALCHEMY_DATABASE_URI", "")
+    if db_uri.startswith("sqlite:///"):
+        db_path = db_uri.replace("sqlite:///", "", 1)
+        if db_path:
+            db_dir = os.path.dirname(db_path)
+            if db_dir:
+                os.makedirs(db_dir, exist_ok=True)
+
     # Extensions
     CORS(app, supports_credentials=True)
     db.init_app(app)
@@ -72,8 +80,15 @@ def create_app(config_class: type = Config) -> Flask:
 
     register_blueprints(app)
 
-    # Optionally auto-create DB tables and seed data on first run (for containerized deploys)
-    if os.getenv("DB_AUTOCREATE", "false").lower() in ("1", "true", "yes", "y"): 
+    # Auto-create DB tables for local sqlite, or when explicitly enabled.
+    auto_create_env = os.getenv("DB_AUTOCREATE")
+    auto_create = False
+    if auto_create_env is None:
+        auto_create = db_uri.startswith("sqlite:///")
+    else:
+        auto_create = auto_create_env.lower() in ("1", "true", "yes", "y")
+
+    if auto_create:
         try:
             # Ensure models are imported so SQLAlchemy knows all tables
             from . import models  # noqa: F401

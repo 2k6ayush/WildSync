@@ -2,7 +2,18 @@
 // API utilities, authentication, and common functionality
 
 // Configuration
-const API_BASE = (window.__API_BASE__ || (window.__API_CONFIG__ && window.__API_CONFIG__.API_BASE) || '/api');
+const RAW_API_BASE = (window.__API_BASE__ || (window.__API_CONFIG__ && window.__API_CONFIG__.API_BASE) || '/api');
+const API_BASE = (() => {
+    const fallback = '/api';
+    if (!RAW_API_BASE) return fallback;
+    const host = window.location.hostname;
+    const isLocalHost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+    const isLocalApi = RAW_API_BASE.includes('localhost') || RAW_API_BASE.includes('127.0.0.1');
+    if (!isLocalHost && isLocalApi) {
+        return fallback;
+    }
+    return RAW_API_BASE;
+})();
 const CONFIG = {
     endpoints: {
         auth: `${API_BASE}/auth`,
@@ -13,6 +24,12 @@ const CONFIG = {
         community: `${API_BASE}/community`,
         profile: `${API_BASE}/profile`
     }
+};
+
+// App State
+const State = {
+    currentForestId: null,
+    currentAnalysisId: null
 };
 
 // Utility Functions
@@ -154,6 +171,10 @@ const API = {
         async upload(file, progressCallback = null) {
             const formData = new FormData();
             formData.append('file', file);
+            const forestIdInput = document.getElementById('forest-id');
+            if (forestIdInput && forestIdInput.value) {
+                formData.append('forest_id', forestIdInput.value);
+            }
 
             const options = {
                 method: 'POST',
@@ -404,7 +425,8 @@ const ChatManager = {
         this.messagesContainer.appendChild(typingDiv);
 
         try {
-            const result = await API.chatbot.sendMessage(message);
+            const forestId = (window.WildSync && window.WildSync.State && window.WildSync.State.currentForestId) || null;
+            const result = await API.chatbot.sendMessage(message, forestId);
 
             // Remove typing indicator
             typingDiv.remove();
@@ -544,5 +566,6 @@ window.WildSync = {
     ChatManager,
     Navigation,
     FormValidator,
-    CONFIG
+    CONFIG,
+    State
 };

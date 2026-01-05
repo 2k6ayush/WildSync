@@ -1,0 +1,4 @@
+Generating frontend config...
+Generated frontend config at: D:\code_space\WildSync\WildSync\frontend\static\js\config.js
+API Base: http://localhost:5000/api
+Serving frontend on http://localhost:8080 from D:\code_space\WildSync\WildSync\frontend

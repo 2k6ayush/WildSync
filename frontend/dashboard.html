@@ -348,6 +348,21 @@
             // Load initial data
             loadOverviewData();
 
+            const storedForestId = sessionStorage.getItem('wildsync_forest_id');
+            if (storedForestId) {
+                const forestIdInput = document.getElementById('forest-id');
+                if (forestIdInput) {
+                    forestIdInput.value = storedForestId;
+                }
+                if (WildSync.State) {
+                    WildSync.State.currentForestId = parseInt(storedForestId, 10);
+                }
+            }
+            const storedAnalysisId = sessionStorage.getItem('wildsync_analysis_id');
+            if (storedAnalysisId && WildSync.State) {
+                WildSync.State.currentAnalysisId = parseInt(storedAnalysisId, 10);
+            }
+
             // Set up logout
             document.getElementById('logout-btn').addEventListener('click', (e) => {
                 e.preventDefault();
@@ -380,7 +395,28 @@
 
                 // Special initialization for certain sections
                 if (sectionId === 'maps') {
-                    setTimeout(initializeMap, 100);
+                    setTimeout(async () => {
+                        initializeMap();
+                        if (map) {
+                            map.invalidateSize();
+                        }
+                        if (lastLayers) {
+                            renderLayers(lastLayers, renderMode);
+                            return;
+                        }
+                        const storedAnalysisId = (WildSync.State && WildSync.State.currentAnalysisId) ||
+                            sessionStorage.getItem('wildsync_analysis_id');
+                        if (storedAnalysisId) {
+                            try {
+                                const layers = await WildSync.API.maps.getLayers(storedAnalysisId);
+                                lastLayers = layers;
+                                renderLayers(layers, renderMode);
+                            } catch (e) {
+                                console.warn('Unable to load map layers:', e);
+                                WildSync.Utils.showAlert('Unable to load heat map layers. Run analysis first.', 'warning');
+                            }
+                        }
+                    }, 100);
                 }
             }
 
@@ -418,6 +454,19 @@
                     hideUploadProgress();
                     displayUploadedFile(file, result);
                     updateAnalysisStatus();
+                    if (result && result.forest_id) {
+                        const forestIdInput = document.getElementById('forest-id');
+                        if (forestIdInput) {
+                            forestIdInput.value = result.forest_id;
+                        }
+                        if (WildSync.State) {
+                            WildSync.State.currentForestId = result.forest_id;
+                        }
+                        sessionStorage.setItem('wildsync_forest_id', result.forest_id);
+                    }
+                    if (result && Array.isArray(result.warnings) && result.warnings.length) {
+                        WildSync.Utils.showAlert(result.warnings.join(' '), 'warning');
+                    }
                 } catch (error) {
                     hideUploadProgress();
                     console.error('Upload failed:', error);
@@ -475,22 +524,35 @@
 
                 const result = await WildSync.API.analysis.start(forestId);
                 currentAnalysisId = result.analysis_id;
+                if (WildSync.State) {
+                    WildSync.State.currentForestId = forestId;
+                    WildSync.State.currentAnalysisId = currentAnalysisId;
+                }
+                sessionStorage.setItem('wildsync_forest_id', forestId);
+                if (currentAnalysisId) {
+                    sessionStorage.setItem('wildsync_analysis_id', currentAnalysisId);
+                }
 
                 analysisContent.classList.add('d-none');
                 analysisResults.classList.remove('d-none');
 
-                // Initialize charts (use generic placeholders; adjust if backend returns metrics)
-                createCompletenessChart();
-                displayRiskMetrics();
+                const completenessPercent = result.completeness ? result.completeness.percent : 0;
+                createCompletenessChart(completenessPercent);
+                displayRiskMetrics(result.risk_score, result.recommendations);
                 displayRecommendations(result.recommendations);
 
                 // Attempt to load map layers for this analysis
-                try {
-                    const layers = await WildSync.API.maps.getLayers(currentAnalysisId);
-                    lastLayers = layers;
-                    renderLayers(layers, renderMode);
-                } catch (e) {
-                    console.warn('Unable to load map layers:', e);
+                if (result.heat_map_data) {
+                    lastLayers = result.heat_map_data;
+                    renderLayers(result.heat_map_data, renderMode);
+                } else {
+                    try {
+                        const layers = await WildSync.API.maps.getLayers(currentAnalysisId);
+                        lastLayers = layers;
+                        renderLayers(layers, renderMode);
+                    } catch (e) {
+                        console.warn('Unable to load map layers:', e);
+                    }
                 }
 
                 WildSync.Utils.showAlert('Analysis completed successfully!', 'success');
@@ -504,6 +566,18 @@
                     WildSync.Utils.showAlert('Analysis failed. Please try again.', 'error');
                 }
             }
+        }
+
+        function resolveLayerPayload(layers) {
+            if (!layers || !layers.layers || typeof layers.layers !== 'object') {
+                return { layer: layers, source: layers };
+            }
+            const available = Object.keys(layers.layers);
+            if (!available.length) {
+                return { layer: layers, source: layers };
+            }
+            const selected = layers.layers[selectedLayerKey] || layers.layers[available[0]];
+            return { layer: selected, source: layers };
         }
 
         function renderLayers(layers, mode = 'auto') {
@@ -521,10 +595,13 @@
                 }
 
                 let bounds = null;
+                const resolved = resolveLayerPayload(layers);
+                const layerData = resolved.layer;
+                const sourceData = resolved.source || {};
 
                 // Support GeoJSON if present
-                if (layers.type === 'FeatureCollection' || layers.features) {
-                    const gj = L.geoJSON(layers, {
+                if (layerData && (layerData.type === 'FeatureCollection' || layerData.features)) {
+                    const gj = L.geoJSON(layerData, {
                         style: function () { return { color: '#ff7800', weight: 2, fillOpacity: 0.3 }; }
                     });
                     gj.addTo(dataLayerGroup);
@@ -536,22 +613,22 @@
                 const modeLower = (mode || 'auto').toLowerCase();
                 const forceHeat = modeLower === 'heat';
                 const forceMarkers = modeLower === 'markers';
-                if (Array.isArray(layers.heat)) {
+                if (Array.isArray(sourceData.heat)) {
                     // Expected format: [{lat, lng, weight}]
-                    heatPoints = layers.heat
+                    heatPoints = sourceData.heat
                         .filter(p => p.lat && p.lng)
                         .map(p => [p.lat, p.lng, p.weight || p.intensity || 0.5]);
-                } else if (Array.isArray(layers.heatmap)) {
-                    heatPoints = layers.heatmap
+                } else if (Array.isArray(sourceData.heatmap)) {
+                    heatPoints = sourceData.heatmap
                         .filter(p => p.lat && p.lng)
                         .map(p => [p.lat, p.lng, p.weight || p.intensity || 0.5]);
-                } else if (Array.isArray(layers.heat_points)) {
-                    heatPoints = layers.heat_points
+                } else if (Array.isArray(sourceData.heat_points)) {
+                    heatPoints = sourceData.heat_points
                         .filter(p => p.lat && p.lng)
                         .map(p => [p.lat, p.lng, p.weight || p.intensity || 0.5]);
-                } else if (Array.isArray(layers.points) && layers.points.some(p => p.weight || p.intensity)) {
+                } else if (Array.isArray(sourceData.points) && sourceData.points.some(p => p.weight || p.intensity)) {
                     // If points carry a weight/intensity attribute, use them
-                    heatPoints = layers.points
+                    heatPoints = sourceData.points
                         .filter(p => p.lat && p.lng)
                         .map(p => [p.lat, p.lng, p.weight || p.intensity || 0.5]);
                 }
@@ -559,11 +636,11 @@
                 if (!forceMarkers && heatPoints.length) {
                     // Build heat layer
                     heatLayer = L.heatLayer(heatPoints, {
-                        radius: layers.heat_radius || 25,
-                        blur: layers.heat_blur || 15,
-                        maxZoom: layers.heat_maxZoom || 17,
-                        max: layers.heat_max || 1.0,
-                        gradient: layers.heat_gradient || undefined
+                        radius: sourceData.heat_radius || 25,
+                        blur: sourceData.heat_blur || 15,
+                        maxZoom: sourceData.heat_maxZoom || 17,
+                        max: sourceData.heat_max || 1.0,
+                        gradient: sourceData.heat_gradient || undefined
                     }).addTo(dataLayerGroup);
 
                     // Compute bounds from heat points
@@ -573,10 +650,10 @@
                 }
 
                 // If points array is present (non-weighted markers)
-                if (Array.isArray(layers.points) && (forceMarkers || heatPoints.length === 0)) {
+                if (Array.isArray(sourceData.points) && (forceMarkers || heatPoints.length === 0)) {
                     const layerItems = [];
                     const ptsBounds = new L.LatLngBounds();
-                    layers.points.forEach(p => {
+                    sourceData.points.forEach(p => {
                         if (p.lat && p.lng) {
                             const color = p.risk === 'high' ? 'red' : p.risk === 'medium' ? 'orange' : 'green';
                             const circle = L.circle([p.lat, p.lng], { color, fillColor: color, fillOpacity: 0.3, radius: p.radius || 800 });
@@ -591,8 +668,8 @@
                 }
 
                 // BBox fallback if provided: [west, south, east, north]
-                if ((!bounds || !bounds.isValid()) && Array.isArray(layers.bbox) && layers.bbox.length === 4) {
-                    const [west, south, east, north] = layers.bbox;
+                if ((!bounds || !bounds.isValid()) && Array.isArray(sourceData.bbox) && sourceData.bbox.length === 4) {
+                    const [west, south, east, north] = sourceData.bbox;
                     bounds = L.latLngBounds([south, west], [north, east]);
                 }
 
@@ -607,41 +684,69 @@
         }
 
         function displayRecommendations(recs) {
+            const container = document.getElementById('ai-recommendations');
+            if (!container) {
+                return;
+            }
             if (!recs) {
-                // Fallback recommendations
-                document.getElementById('ai-recommendations').innerHTML = `
+                container.innerHTML = `
                     <div class="recommendation">
-                        <h5>🌳 Forest Health</h5>
+                        <h5>Forest Health</h5>
                         <p>Implement selective thinning in high-density areas to reduce fire risk and improve forest health.</p>
                     </div>
                     <div class="recommendation">
-                        <h5>🦎 Wildlife Protection</h5>
+                        <h5>Wildlife Protection</h5>
                         <p>Establish buffer zones around identified wildlife corridors to maintain ecosystem connectivity.</p>
                     </div>
                     <div class="recommendation">
-                        <h5>💧 Water Management</h5>
+                        <h5>Water Management</h5>
                         <p>Install water retention systems in areas with declining soil moisture levels.</p>
                     </div>
                 `;
                 return;
             }
-            // Render backend recommendations structure if provided
-            const container = document.getElementById('ai-recommendations');
             if (Array.isArray(recs)) {
-                container.innerHTML = recs.map(item => `<div class="recommendation"><h5>${item.title || 'Recommendation'}</h5><p>${item.text || ''}</p></div>`).join('');
-            } else {
-                container.textContent = JSON.stringify(recs, null, 2);
+                container.innerHTML = recs
+                    .map(item => `
+                        <div class="recommendation">
+                            <h5>${item.title || 'Recommendation'}</h5>
+                            <p>${item.text || ''}</p>
+                        </div>
+                    `)
+                    .join('');
+                return;
             }
+            if (typeof recs === 'object') {
+                const steps = Array.isArray(recs.steps) ? recs.steps : [];
+                const resources = recs.resources || {};
+                const resourceParts = [];
+                if (resources.budget !== undefined) resourceParts.push(`Budget: ${resources.budget}`);
+                if (resources.manpower !== undefined) resourceParts.push(`Manpower: ${resources.manpower}`);
+                if (Array.isArray(resources.materials) && resources.materials.length) {
+                    resourceParts.push(`Materials: ${resources.materials.join(', ')}`);
+                }
+                container.innerHTML = `
+                    <div class="recommendation">
+                        <h5>Severity: ${recs.severity || 'Unknown'}</h5>
+                        <p>${recs.timeline || ''}</p>
+                        ${steps.length ? `<ul>${steps.map(s => `<li>${s}</li>`).join('')}</ul>` : '<p>No action steps available.</p>'}
+                        ${resourceParts.length ? `<p>${resourceParts.join(' | ')}</p>` : ''}
+                    </div>
+                `;
+                return;
+            }
+            container.textContent = String(recs);
         }
 
-        function createCompletenessChart() {
+        function createCompletenessChart(percentComplete = 0) {
             const ctx = document.getElementById('completeness-chart').getContext('2d');
+            const complete = Math.max(0, Math.min(100, percentComplete));
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: ['Complete', 'Missing'],
                     datasets: [{
-                        data: [75, 25],
+                        data: [complete, 100 - complete],
                         backgroundColor: ['#7fb069', '#e9ecef'],
                         borderWidth: 0
                     }]
@@ -657,36 +762,22 @@
             });
         }
 
-        function displayRiskMetrics() {
+        function displayRiskMetrics(riskScore = null, recs = null) {
+            const severity = recs && recs.severity ? recs.severity : 'Unknown';
+            const timeline = recs && recs.timeline ? recs.timeline : 'N/A';
+            const scoreText = (riskScore !== null && riskScore !== undefined) ? Number(riskScore).toFixed(2) : 'N/A';
             document.getElementById('risk-metrics').innerHTML = `
                 <div class="risk-metric">
-                    <span class="risk-label">🔴 High Risk Zones</span>
-                    <span class="risk-value">3</span>
+                    <span class="risk-label">Risk Severity</span>
+                    <span class="risk-value">${severity}</span>
                 </div>
                 <div class="risk-metric">
-                    <span class="risk-label">🟡 Medium Risk Zones</span>
-                    <span class="risk-value">7</span>
+                    <span class="risk-label">Risk Score</span>
+                    <span class="risk-value">${scoreText}</span>
                 </div>
                 <div class="risk-metric">
-                    <span class="risk-label">🟢 Low Risk Zones</span>
-                    <span class="risk-value">12</span>
-                </div>
-            `;
-        }
-
-        function displayRecommendations() {
-            document.getElementById('ai-recommendations').innerHTML = `
-                <div class="recommendation">
-                    <h5>🌳 Forest Health</h5>
-                    <p>Implement selective thinning in high-density areas to reduce fire risk and improve forest health.</p>
-                </div>
-                <div class="recommendation">
-                    <h5>🦎 Wildlife Protection</h5>
-                    <p>Establish buffer zones around identified wildlife corridors to maintain ecosystem connectivity.</p>
-                </div>
-                <div class="recommendation">
-                    <h5>💧 Water Management</h5>
-                    <p>Install water retention systems in areas with declining soil moisture levels.</p>
+                    <span class="risk-label">Recommended Timeline</span>
+                    <span class="risk-value">${timeline}</span>
                 </div>
             `;
         }
@@ -702,6 +793,7 @@
         let heatLayer = null;
         let renderMode = 'auto';
         let lastLayers = null;
+        let selectedLayerKey = 'risk';
 
         function initMaps() {
             // Map will be initialized when section is shown
@@ -760,6 +852,16 @@
             if (modeSelect) {
                 modeSelect.addEventListener('change', (e) => {
                     renderMode = e.target.value;
+                    if (lastLayers) {
+                        renderLayers(lastLayers, renderMode);
+                    }
+                });
+            }
+            const layerSelect = document.getElementById('layer-select');
+            if (layerSelect) {
+                selectedLayerKey = layerSelect.value || selectedLayerKey;
+                layerSelect.addEventListener('change', (e) => {
+                    selectedLayerKey = e.target.value;
                     if (lastLayers) {
                         renderLayers(lastLayers, renderMode);
                     }

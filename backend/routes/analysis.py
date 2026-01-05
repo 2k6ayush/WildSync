@@ -31,9 +31,15 @@ def start_analysis():
     db.session.add(analysis)
     db.session.commit()
 
+    risk_score = None
+    if isinstance(analysis.risk_zones, dict):
+        risk_score = analysis.risk_zones.get("overall")
+
     return jsonify({
         "status": "ok",
         "analysis_id": analysis.analysis_id,
         "heat_map_data": analysis.heat_map_data,
         "recommendations": analysis.recommendations,
+        "completeness": completeness,
+        "risk_score": risk_score,
     })

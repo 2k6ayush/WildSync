@@ -1,6 +1,7 @@
 from typing import Dict, Any
 import numpy as np
 from ..models import Analysis, ForestData
+from .location import parse_coordinates
 
 
 def compute_completeness(fd: ForestData) -> Dict[str, Any]:
@@ -80,6 +81,12 @@ def analyze_forest_data(fd: ForestData) -> Analysis:
 
     score = risk_score(tree_count, soil_health, animal_index)
 
+    coords = None
+    if fd.forest and fd.forest.coordinates:
+        coords = parse_coordinates(fd.forest.coordinates)
+    lat = coords["lat"] if coords else 0.0
+    lon = coords["lon"] if coords else 0.0
+
     layer = {
         "type": "FeatureCollection",
         "features": [
@@ -94,12 +101,19 @@ def analyze_forest_data(fd: ForestData) -> Analysis:
                         "animal_activity": animal_index,
                     },
                 },
-                "geometry": {"type": "Point", "coordinates": [0, 0]},
+                "geometry": {"type": "Point", "coordinates": [lon, lat]},
             }
         ],
     }
 
     recs = generate_recommendations(score)
+
+    heat_point = {"lat": lat, "lng": lon, "weight": score}
+    risk_label = severity_label(score).lower()
+    bbox = None
+    if coords:
+        pad = 0.05
+        bbox = [lon - pad, lat - pad, lon + pad, lat + pad]
 
     analysis = Analysis(
         forest_id=fd.forest_id,
@@ -107,6 +121,9 @@ def analyze_forest_data(fd: ForestData) -> Analysis:
         recommendations=recs,
         heat_map_data={
             "layers": {"risk": layer},
+            "heat": [heat_point],
+            "points": [{"lat": lat, "lng": lon, "risk": risk_label}],
+            "bbox": bbox,
             "legend": {
                 "0.0-0.3": "Green (healthy)",
                 "0.3-0.6": "Yellow (moderate)",
